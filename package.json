@@ -1,10 +1,13 @@
 {
   "name": "garage49-tui",
+  "version": "0.1.0",
   "private": true,
-  "workspaces": ["packages/node", "samples/node"],
+  "packageManager": "pnpm@10.26.2",
   "scripts": {
-    "build": "npm run build --workspace packages/node",
-    "check": "npm run check --workspaces",
-    "gallery": "npm run build && npm start --workspace samples/node"
+    "check": "pnpm --filter ./packages/node check && pnpm --filter ./samples/node check && pnpm -r build",
+    "build": "pnpm -r build",
+    "complexity": "pnpm -r complexity",
+    "test": "pnpm -r test",
+    "gallery": "pnpm --filter ./packages/node build && pnpm --filter ./samples/node start"
   }
 }

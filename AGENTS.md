@@ -61,12 +61,12 @@ These rules come from the project-baseline skill. A rule that differs here on pu
 | Purpose | Command |
 |---|---|
 | Specification check | `aterm corpus check` |
-| Unit tests (Node) | `npm test --workspace packages/node` |
+| Unit tests (Node) | `pnpm test` |
 | Unit tests (Rust) | `cargo test --workspace` |
-| Complexity check (Node: ESLint `complexity` 10, `max-lines-per-function` 50, `max-params` 5) | `npm run complexity --workspace packages/node` |
+| Complexity check (Node: ESLint `complexity` 10, `max-lines-per-function` 50, `max-params` 5) | `pnpm complexity` |
 | Complexity check (Rust: clippy `cognitive_complexity` 10, `too_many_lines` 50, `too_many_arguments` 5) | `cargo clippy --workspace --all-targets` |
-| Everything (Node) | `npm run check` |
-| Gallery (Node) | `npm run gallery` |
+| Everything (Node) | `pnpm check` |
+| Gallery (Node) | `pnpm gallery` |
 | Gallery (Rust) | `cargo run -p garage49-tui-gallery` |
 
 lizard was tried first and dropped: it skips `.tsx` when scanning and counts destructured props as parameters. The language-native tools parse each language precisely with the same limits.
@@ -85,4 +85,5 @@ lizard was tried first and dropped: it skips `.tsx` when scanning and counts des
 - Keys are bindings as data (`useKeys` / `use_keys`), never handler chains; printable text falls through to text fields; while a text field is editing, single-letter app keys (q ? t m) are text.
 - Mouse: SGR reporting on by default; `m` toggles it so the terminal's drag-to-select works; clicks bubble innermost → outermost within the top layer; the wheel moves cursors and scrolls views. In iocraft a component that listens to the mouse must have a View as its root.
 - Minimum terminal size 80×24; below it the Screen shows a notice. Spinners advance every 160 ms.
+- Builds and releases follow the garage49 build farm rules (github.com/garage49/.github, RULES.md): pnpm workspace, one `.github/workflows/build.yml` calling the shared workflows, releases only from a `vX.Y.Z` tag on `main` whose version equals the root `package.json`, `packages/node/package.json` and `packages/rust/Cargo.toml`; no publish tokens in the repo (trusted publishing).
 - Every element is shown in both galleries, and the galleries are compared in a 110×32 tmux pane before a change is accepted.

@@ -5,7 +5,7 @@ The garage49 TUI design system for Node.js: OpenCode's look and feel as [Ink](ht
 ## Install
 
 ```bash
-npm install @garage49/garage49-tui-ink ink react
+pnpm add @garage49/garage49-tui-ink ink react   # or npm install
 ```
 
 Requires Node.js 20 or later, Ink 8 and React 19.
@@ -94,5 +94,5 @@ npm run complexity
 The gallery in `samples/node` of the repository shows every component:
 
 ```bash
-npm run gallery
+pnpm gallery
 ```

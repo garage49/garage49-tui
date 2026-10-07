@@ -10,7 +10,7 @@
     "check": "npm run typecheck && npm run complexity && npm test"
   },
   "dependencies": {
-    "@garage49/garage49-tui-ink": "*",
+    "@garage49/garage49-tui-ink": "workspace:*",
     "ink": "^8.0.0",
     "react": "^19.0.0"
   },

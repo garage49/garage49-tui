@@ -10,16 +10,16 @@ The specification is `docs/design-system.trm` (aterm); `docs/DESIGN.md` is its r
 ## Install
 
 ```bash
-npm install          # Node workspaces (packages/node, samples/node)
+pnpm install         # Node workspace (packages/node, samples/node); corepack enable gives you pnpm
 cargo build          # Rust workspace (packages/rust, samples/rust)
 ```
 
-Requires Node.js 20+, Rust 1.80+, and for the specification the `aterm` CLI.
+Requires Node.js 20+ with pnpm, Rust 1.80+, and for the specification the `aterm` CLI.
 
 ## Build
 
 ```bash
-npm run build        # emits packages/node/dist
+pnpm build           # emits packages/node/dist
 cargo build --workspace
 ```
 
@@ -28,16 +28,18 @@ cargo build --workspace
 Unit tests:
 
 ```bash
-npm test --workspace packages/node
+pnpm test
 cargo test --workspace
 ```
 
 Complexity check (same limits in both languages: complexity 10, 50 lines per function, 5 parameters):
 
 ```bash
-npm run complexity --workspace packages/node     # ESLint
+pnpm complexity                                  # ESLint
 cargo clippy --workspace --all-targets           # clippy
 ```
+
+`pnpm check` runs the Node type check, complexity check, tests and build in one go.
 
 Specification check:
 
@@ -48,8 +50,10 @@ aterm corpus check
 ## Run
 
 ```bash
-npm run gallery                      # Node gallery (builds the package first)
+pnpm gallery                         # Node gallery (builds the package first)
 cargo run -p garage49-tui-gallery    # Rust gallery
 ```
+
+Releases: bump `version` in the root `package.json`, `packages/node/package.json` and `packages/rust/Cargo.toml` in one commit on `main`, then tag it `vX.Y.Z`; the garage49 build farm publishes to npm and crates.io from the tag.
 
 Both galleries need a terminal of at least 80×24; truecolor selects the OpenCode theme, otherwise the system theme is used. `G49_THEME=system` forces the fallback.
