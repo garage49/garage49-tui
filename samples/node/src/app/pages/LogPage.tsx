@@ -1,7 +1,7 @@
 import {Box} from 'ink';
 import {useEffect, useState} from 'react';
 import type {PageProps} from './Page.js';
-import {Label, LogView, useKeys} from '@garage49/garage49-tui-ink';
+import {Label, LogView, useKeys, Section} from '@garage49/garage49-tui-ink';
 import type {LogEntry, LogLevel} from '@garage49/garage49-tui-ink';
 
 const messages: readonly [LogLevel, string][] = [
@@ -47,7 +47,8 @@ export function LogPage({focused, report}: PageProps) {
   ], {isActive: focused});
 
   return (
-    <Box flexDirection="column" flexGrow={1}>
+    <Section title="Server log" grow>
+    <Box flexDirection="column" flexGrow={1} minHeight={0}>
       <Box flexDirection="row">
         <Label variant="muted">{entries.length} entries · </Label>
         <Label variant={paused ? 'warning' : 'success'}>{paused ? 'paused' : 'live'}</Label>
@@ -57,5 +58,6 @@ export function LogPage({focused, report}: PageProps) {
       <Box height={1} />
       <LogView entries={entries} offset={offset} onScroll={setOffset} />
     </Box>
+    </Section>
   );
 }

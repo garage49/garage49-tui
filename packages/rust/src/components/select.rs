@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use iocraft::prelude::*;
 
+use super::truncate::Truncate;
 use super::dropdown::Dropdown;
 use super::field_bar::FieldBar;
 use super::form::UseFormLayout;
@@ -77,7 +78,7 @@ pub fn Select(props: &mut SelectProps, mut hooks: Hooks) -> impl Into<AnyElement
             View(width: label_width, flex_shrink: 0.0_f32) { Text(content: props.label.clone(), color: if focused { t.text } else { t.text_muted }) }
             FieldBar(focused: focused)
             View(width: value_width, background_color: t.surface, padding_left: 1, padding_right: 1, flex_direction: FlexDirection::Row) {
-                View(flex_grow: 1.0_f32, overflow: Overflow::Hidden) { Text(content: current, color: t.text, wrap: TextWrap::NoWrap) }
+                Truncate(content: current, color: t.text)
                 Text(content: " ▾", color: if focused { t.text } else { t.text_muted })
             }
         }

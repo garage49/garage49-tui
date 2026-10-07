@@ -46,7 +46,7 @@ export function List({items, selectedId, focused = true, width, onClick, onSelec
     <Box ref={box} flexDirection="column" width={width}>
       {rows.map(row => {
         if (row.kind === 'gap') return <Box key={row.key} height={1} />;
-        if (row.kind === 'section') return <Box key={row.key} paddingX={1}><Text bold color={theme.tokens.heading}>{row.title}</Text></Box>;
+        if (row.kind === 'section') return <Box key={row.key}><Text bold color={theme.tokens.heading}>{row.title}</Text></Box>;
         return <ListItemRow key={row.key} row={row} selected={row.item.id === selectedId} focused={focused} />;
       })}
     </Box>
@@ -62,7 +62,7 @@ function ListItemRow({row, selected, focused}: {row: Extract<ListRow, {kind: 'it
   const trailing = item.value ?? item.shortcut;
   const trailingColor = highlighted ? theme.tokens.selectionText : item.value ? theme.tokens.text : theme.tokens.textMuted;
   return (
-    <Box backgroundColor={fill} paddingX={1} flexDirection="row">
+    <Box backgroundColor={fill} flexDirection="row">
       <Box flexShrink={1} overflow="hidden"><Text bold={selected} color={color} wrap="truncate-end">{item.label}</Text></Box>
       <Box flexGrow={1} />
       {trailing && <Box flexShrink={0} marginLeft={2}><Text color={trailingColor}>{trailing}</Text></Box>}

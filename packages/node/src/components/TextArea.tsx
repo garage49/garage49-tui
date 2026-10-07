@@ -4,6 +4,7 @@ import {useKeys, type Binding} from '../input/Keys.js';
 import {useMouseTarget} from '../input/Mouse.js';
 import {useTyping} from '../shell/Typing.js';
 import {useTheme} from '../theme/ThemeContext.js';
+import {useEditing} from './Editing.js';
 import {FieldBar} from './FieldBar.js';
 import {useFieldColumns} from './Form.js';
 import {Scrollbar} from './Scrollbar.js';
@@ -30,8 +31,9 @@ type Props = {
 export function TextArea({label, buffer, onChange, placeholder = '', focused = false, onFocus, labelWidth, rows = 5, onLeave}: Props) {
   const theme = useTheme();
   const {labelCol} = useFieldColumns(labelWidth);
-  useTyping(focused);
   const box = useRef<DOMElement>(null);
+  const {editing, resume} = useEditing(box, focused);
+  useTyping(editing);
   const [scrollTop, setScrollTop] = useState(0);
   const maxTop = Math.max(0, buffer.lines.length - rows);
   const top = Math.min(scrollTop, maxTop);
@@ -42,7 +44,7 @@ export function TextArea({label, buffer, onChange, placeholder = '', focused = f
   }, [buffer, rows]); // follows the cursor whenever the buffer changes; `top` is derived from it
 
   useMouseTarget(box, {
-    onPress: () => onFocus?.(),
+    onPress: () => { resume(); onFocus?.(); },
     onWheel: event => setScrollTop(Math.max(0, Math.min(maxTop, top + (event.kind === 'wheel-up' ? -3 : 3)))),
   });
   // Keys faster than renders chain on `pending`, not on the buffer captured at the last render.
@@ -52,18 +54,18 @@ export function TextArea({label, buffer, onChange, placeholder = '', focused = f
     pending.current = next;
     onChange?.(next);
   };
-  useKeys(editorBindings(() => pending.current, emit, rows, onLeave), {isActive: focused, onText: text => emit(pending.current.insert(text))});
+  useKeys(editorBindings(() => pending.current, emit, rows, onLeave), {isActive: editing, onText: text => emit(pending.current.insert(text))});
 
-  const empty = buffer.text === '' && !focused;
+  const empty = buffer.text === '' && !editing;
   return (
     <Box ref={box} flexDirection="row" height={rows}>
-      <Box width={labelCol} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
-      <FieldBar focused={focused} rows={rows} />
+      <Box width={labelCol} flexShrink={0}><Text color={editing ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
+      <FieldBar focused={editing} rows={rows} />
       <Box flexDirection="column" flexGrow={1} backgroundColor={theme.tokens.surface} paddingX={1}>
         {empty && <Text color={theme.tokens.textMuted}>{placeholder}</Text>}
         {!empty && Array.from({length: rows}, (_, index) => {
           const row = top + index;
-          return <TextAreaLine key={row} line={buffer.lines[row]} cursorCol={focused && row === buffer.row ? buffer.col : undefined} />;
+          return <TextAreaLine key={row} line={buffer.lines[row]} cursorCol={editing && row === buffer.row ? buffer.col : undefined} />;
         })}
       </Box>
       <Box backgroundColor={theme.tokens.surface}><Scrollbar rows={rows} total={buffer.lines.length} visible={rows} offset={top} /></Box>

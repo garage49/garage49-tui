@@ -1,6 +1,7 @@
 use iocraft::prelude::*;
 
 use super::list_layout::{ListLayout, ListRow};
+use super::truncate::Truncate;
 use crate::input::{MouseLayer, UseMouse};
 use crate::theme::Theme;
 
@@ -82,7 +83,7 @@ pub fn List(props: &mut ListProps, mut hooks: Hooks) -> impl Into<AnyElement<'st
             #(rows.into_iter().enumerate().map(|(index, row)| match row {
                 ListRow::Gap => element! { View(key: index, height: 1) }.into_any(),
                 ListRow::Section(title) => element! {
-                    View(key: index, padding_left: 1, padding_right: 1) { Text(content: title, weight: Weight::Bold, color: theme.tokens.heading) }
+                    View(key: index) { Text(content: title, weight: Weight::Bold, color: theme.tokens.heading) }
                 }.into_any(),
                 ListRow::Item(item) => {
                     let is_selected = selected.as_deref() == Some(item.id.as_str());
@@ -93,10 +94,9 @@ pub fn List(props: &mut ListProps, mut hooks: Hooks) -> impl Into<AnyElement<'st
                     let trailing_color = if highlighted { theme.tokens.selection_text } else if item.value.is_some() { theme.tokens.text } else { theme.tokens.text_muted };
                     let weight = if is_selected { Weight::Bold } else { Weight::Normal };
                     element! {
-                        View(key: index, background_color: fill, padding_left: 1, padding_right: 1, flex_direction: FlexDirection::Row) {
-                            View(flex_shrink: 1.0_f32, overflow: Overflow::Hidden) { Text(content: item.label, weight: weight, color: color, wrap: TextWrap::NoWrap) }
-                            View(flex_grow: 1.0_f32)
-                            #(trailing.map(|text| element! { View(flex_shrink: 0.0_f32, margin_left: 2) { Text(content: text, color: trailing_color) } }))
+                        View(key: index, background_color: fill, flex_direction: FlexDirection::Row) {
+                            Truncate(content: item.label, weight: weight, color: color)
+                            #(trailing.map(|text| element! { View(flex_shrink: 0.0_f32, padding_left: 2) { Text(content: text, color: trailing_color) } }))
                         }
                     }.into_any()
                 }

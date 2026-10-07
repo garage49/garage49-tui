@@ -8,9 +8,9 @@ describe('TreeClick', () => {
     expect(TreeClick.decide(false, true)).toBe('toggle');
   });
 
-  it('finds the marker cell after the padding and the indent', () => {
-    expect(TreeClick.isMarker(1, 0)).toBe(true);
-    expect(TreeClick.isMarker(3, 1)).toBe(true);
-    expect(TreeClick.isMarker(4, 1)).toBe(false);
+  it('finds the marker cell after the indent', () => {
+    expect(TreeClick.isMarker(0, 0)).toBe(true);
+    expect(TreeClick.isMarker(2, 1)).toBe(true);
+    expect(TreeClick.isMarker(3, 1)).toBe(false);
   });
 });

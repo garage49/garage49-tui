@@ -1,7 +1,7 @@
 import {Box} from 'ink';
 import {useState} from 'react';
 import type {PageProps} from './Page.js';
-import {Label, Select, TextField, Toggle, useKeys, useMouseSwitch, opencodeTheme, systemTheme, useTheme, useThemeSwitch} from '@garage49/garage49-tui-ink';
+import {Label, Select, TextField, Toggle, useKeys, useMouseSwitch, opencodeTheme, systemTheme, useTheme, useThemeSwitch, Section, Form} from '@garage49/garage49-tui-ink';
 import type {ListItem} from '@garage49/garage49-tui-ink';
 
 const fields = ['theme', 'mouse', 'vim', 'minsize'] as const;
@@ -29,8 +29,9 @@ export function SettingsPage({focused, report}: PageProps) {
 
   const is = (candidate: Field) => focused && field === candidate;
   return (
-    <Box flexDirection="column" width={60}>
-      <Label variant="heading">Appearance</Label>
+    <Box flexDirection="column" flexShrink={0}>
+      <Section title="Appearance">
+      <Form>
       <Select
         label="Theme"
         options={themes}
@@ -39,14 +40,19 @@ export function SettingsPage({focused, report}: PageProps) {
         focused={is('theme')}
         onFocus={() => setField('theme')}
       />
-      <Box height={1} />
-      <Label variant="heading">Input</Label>
+      </Form>
+      </Section>
+      <Section title="Input">
+      <Form>
       <Toggle label="Mouse" value={mouse.enabled} onChange={value => { mouse.setEnabled(value); report(`mouse: ${value ? 'on' : 'off'}`); }} focused={is('mouse')} onFocus={() => setField('mouse')} />
       <Toggle label="Vim keys" value={vim} onChange={value => { setVim(value); report(`vim keys: ${value ? 'on' : 'off'}`); }} focused={is('vim')} onFocus={() => setField('vim')} />
-      <Box height={1} />
-      <Label variant="heading">Window</Label>
+      </Form>
+      </Section>
+      <Section title="Window">
+      <Form>
       <TextField label="Minimum size" value={minSize} onChange={setMinSize} focused={is('minsize')} onFocus={() => setField('minsize')} />
-      <Box height={1} />
+      </Form>
+      </Section>
       <Label variant="muted">Theme and mouse are live; the other values are only reported. With the mouse on, shift+drag selects text in most terminals; `m` toggles it anywhere.</Label>
     </Box>
   );

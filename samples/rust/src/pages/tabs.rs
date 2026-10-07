@@ -1,4 +1,4 @@
-use garage49_tui_iocraft::{Binding, Label, LabelVariant, MainFocus, Tab, Tabs, TabsSize, UseKeys, UseStatus};
+use garage49_tui_iocraft::{Binding, Label, MainFocus, Section, Tab, Tabs, TabsSize, UseKeys, UseStatus};
 use iocraft::prelude::*;
 
 fn tabs() -> Vec<Tab> {
@@ -27,12 +27,13 @@ pub fn TabsPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let large_select = select;
     element! {
         View(flex_direction: FlexDirection::Column) {
-            Label(content: "small · inside pages", variant: LabelVariant::Muted)
-            Tabs(tabs: all.clone(), active_id: active_id.clone(), focused: focused, on_change: move |tab: Tab| small_select(tab))
-            View(padding_left: 2, padding_right: 2, padding_top: 1, padding_bottom: 1) { Label(content: body) }
-            View(height: 1)
-            Label(content: "large · the top navigation", variant: LabelVariant::Muted)
-            Tabs(tabs: all.clone(), active_id: active_id.clone(), focused: focused, size: TabsSize::Large, on_change: move |tab: Tab| large_select(tab))
+            Section(title: "small · inside pages".to_string()) {
+                Tabs(tabs: all.clone(), active_id: active_id.clone(), focused: focused, on_change: move |tab: Tab| small_select(tab))
+                View(padding_left: 2, padding_right: 2, padding_top: 1, padding_bottom: 1) { Label(content: body) }
+            }
+            Section(title: "large · the top navigation".to_string()) {
+                Tabs(tabs: all.clone(), active_id: active_id.clone(), focused: focused, size: TabsSize::Large, on_change: move |tab: Tab| large_select(tab))
+            }
         }
     }
 }

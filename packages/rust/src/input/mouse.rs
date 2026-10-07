@@ -28,6 +28,8 @@ pub trait UseMouse {
     fn mouse_allowed(&self, layer: MouseLayer) -> bool;
     /// Calls `on_event` with local coordinates for mouse presses and wheel ticks inside this component.
     fn use_mouse(&mut self, allowed: bool, on_event: impl FnMut(LocalMouse) + Send + 'static);
+    /// Calls `on_press` for every press that lands outside this component (an editing field ends on it).
+    fn use_mouse_outside(&mut self, allowed: bool, on_press: impl FnMut() + Send + 'static);
 }
 
 impl UseMouse for Hooks<'_, '_> {
@@ -53,6 +55,25 @@ impl UseMouse for Hooks<'_, '_> {
                 _ => return,
             }
             on_event(LocalMouse { kind, local_x: mouse.column as i32, local_y: mouse.row as i32 });
+        });
+    }
+
+    fn use_mouse_outside(&mut self, allowed: bool, mut on_press: impl FnMut() + Send + 'static) {
+        let rect = self.use_component_rect();
+        self.use_terminal_events(move |event| {
+            if !allowed {
+                return;
+            }
+            let TerminalEvent::FullscreenMouse(mouse) = event else { return };
+            if !matches!(mouse.kind, MouseEventKind::Down(_)) {
+                return;
+            }
+            let (x, y) = (mouse.column as i32, mouse.row as i32);
+            // The rect is `None` before the first layout; nothing is inside an unplaced component.
+            let inside = rect.is_some_and(|r| x >= r.left && x < r.right && y >= r.top && y < r.bottom);
+            if !inside {
+                on_press();
+            }
         });
     }
 }

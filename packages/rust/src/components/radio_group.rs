@@ -57,10 +57,11 @@ pub fn RadioGroup(props: &mut RadioGroupProps, mut hooks: Hooks) -> impl Into<An
     hooks.use_keys(props.focused, vec![Binding::new(&["up", "k"], up), Binding::new(&["down", "j"], down), Binding::new(&["space", "enter"], pick)], None);
     let focused = props.focused;
     let value = props.value.clone();
+    let surface = hooks.try_use_context::<RegionSurface>().map(|s| *s).unwrap_or_default();
     element! {
         View(flex_direction: FlexDirection::Row, height: len as u16) {
             View(width: label_col, flex_shrink: 0.0_f32) { Text(content: props.label.clone(), color: if focused { t.text } else { t.text_muted }) }
-            FieldBar(focused: focused, surface: RegionSurface::Background, rows: len as u16)
+            FieldBar(focused: focused, surface: surface, rows: len as u16)
             View(flex_direction: FlexDirection::Column) {
                 #(options.iter().enumerate().map(|(index, option)| {
                     let is_chosen = option.id == value;

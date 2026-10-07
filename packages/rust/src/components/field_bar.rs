@@ -17,7 +17,7 @@ pub struct FieldBarProps {
 pub fn FieldBar(props: &mut FieldBarProps, hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let theme = hooks.use_context::<Theme>().clone();
     let rows = props.rows.unwrap_or(1).max(1);
-    let surface = if props.surface == RegionSurface::Background { RegionSurface::Surface } else { props.surface };
+    let surface = props.surface;
     let glyph = if props.focused { Glyphs::BAR } else { " " };
     let content = (0..rows).map(|_| glyph).collect::<Vec<_>>().join("\n");
     element! {

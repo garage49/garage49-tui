@@ -90,7 +90,7 @@ export function TreeView({nodes, expanded, selectedId, focused = true, onSelect,
         const color = highlighted ? theme.tokens.selectionText : theme.tokens.text;
         const marker = row.node.children ? `${row.expanded ? Glyphs.expanded : Glyphs.collapsed} ` : '  ';
         return (
-          <Box key={row.node.id} backgroundColor={fill} paddingX={1} flexDirection="row">
+          <Box key={row.node.id} backgroundColor={fill} flexDirection="row">
             <Text color={highlighted ? theme.tokens.selectionText : theme.tokens.textMuted}>{'  '.repeat(row.depth)}{marker}</Text>
             <Text bold={selected} color={color} wrap="truncate-end">{row.node.label}</Text>
           </Box>

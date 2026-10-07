@@ -1,7 +1,7 @@
 import {Box} from 'ink';
 import {useState} from 'react';
 import type {PageProps} from './Page.js';
-import {List, useKeys, Selection} from '@garage49/garage49-tui-ink';
+import {List, Section, useKeys, Selection} from '@garage49/garage49-tui-ink';
 import type {ListItem} from '@garage49/garage49-tui-ink';
 
 const items: readonly ListItem[] = [
@@ -24,6 +24,7 @@ export function ListPage({focused, report}: PageProps) {
     {keys: ['enter'], run: () => { const item = items.find(candidate => candidate.id === selectedId); if (item) activate(item); }},
   ], {isActive: focused});
   return (
+    <Section title="Recent projects and actions">
     <Box flexDirection="column" width={56}>
       <List
         items={items}
@@ -33,5 +34,6 @@ export function ListPage({focused, report}: PageProps) {
         onSelect={item => setSelectedId(item.id)}
       />
     </Box>
+    </Section>
   );
 }

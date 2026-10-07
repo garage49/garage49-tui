@@ -1,7 +1,7 @@
 import {Box} from 'ink';
 import {useEffect, useState} from 'react';
 import type {PageProps} from './Page.js';
-import {Chip, Label, Spinner, useKeys, Glyphs} from '@garage49/garage49-tui-ink';
+import {Chip, Label, Spinner, useKeys, Glyphs, Section} from '@garage49/garage49-tui-ink';
 
 const initialTags = ['typescript', 'rust', '한글', 'ink', 'iocraft', 'tui'];
 
@@ -41,28 +41,29 @@ function ChipsDemo({focused, report}: PageProps) {
 
   return (
     <Box flexDirection="column">
-      <Label variant="heading">Chips · tags</Label>
+      <Section title="Chips · tags">
       <Label variant="muted">←→ moves the cursor · x or backspace removes · click selects, click × removes</Label>
       <Box flexDirection="row" marginTop={1} flexWrap="wrap">
         {tags.map((tag, index) => (
           <Chip key={tag} label={tag} selected={focused && index === cursor} onPress={() => setCursor(index)} onRemove={() => remove(tag)} />
         ))}
       </Box>
-      <Box height={1} />
-      <Label variant="heading">Chips · filters (click toggles)</Label>
+      </Section>
+      <Section title="Chips · filters (click toggles)">
       <Box flexDirection="row" marginTop={1}>
         {['active', 'idle', 'archived'].map(filter => (
           <Chip key={filter} label={`${filters.has(filter) ? Glyphs.on : Glyphs.off} ${filter}`} tone={filters.has(filter) ? 'accent' : 'default'} onPress={() => toggleFilter(filter)} />
         ))}
       </Box>
-      <Box height={1} />
-      <Label variant="heading">Chips · status tones</Label>
+      </Section>
+      <Section title="Chips · status tones">
       <Box flexDirection="row" marginTop={1}>
         <Chip label="running" tone="success" />
         <Chip label="degraded" tone="warning" />
         <Chip label="failed" tone="error" />
         <Chip label="v0.1.0" />
       </Box>
+      </Section>
     </Box>
   );
 }
@@ -75,7 +76,7 @@ function SpinnersDemo() {
   }, []);
   return (
     <Box flexDirection="column">
-      <Label variant="heading">Spinners</Label>
+      <Section title="Spinners">
       <Box flexDirection="column" marginTop={1}>
         <Spinner kind="dots" label="dots · syncing projects…" />
         <Spinner kind="line" label="line · building" />
@@ -86,6 +87,7 @@ function SpinnersDemo() {
           <Label variant="muted"> with a progress figure: {String(progress).padStart(2, '0')}%</Label>
         </Box>
       </Box>
+      </Section>
     </Box>
   );
 }

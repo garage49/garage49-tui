@@ -1,4 +1,4 @@
-use garage49_tui_iocraft::{Binding, Chip, ChipTone, Glyphs, Label, LabelVariant, MainFocus, Spinner, SpinnerKind, UseKeys, UseStatus};
+use garage49_tui_iocraft::{Binding, Chip, ChipTone, Glyphs, Label, LabelVariant, MainFocus, Section, Spinner, SpinnerKind, UseKeys, UseStatus};
 use iocraft::prelude::*;
 
 #[component]
@@ -36,7 +36,7 @@ pub fn IndicatorsPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let active_filters = filters.read().clone();
     element! {
         View(flex_direction: FlexDirection::Column) {
-            Label(content: "Chips · tags", variant: LabelVariant::Heading)
+            Section(title: "Chips · tags".to_string()) {
             Label(content: "←→ moves the cursor · x or backspace removes · click selects, click × removes", variant: LabelVariant::Muted)
             View(flex_direction: FlexDirection::Row, margin_top: 1) {
                 #(list.iter().enumerate().map(|(index, tag)| {
@@ -47,8 +47,8 @@ pub fn IndicatorsPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
                         on_remove: move |_| remove(tag_remove.clone())) }
                 }))
             }
-            View(height: 1)
-            Label(content: "Chips · filters (click toggles)", variant: LabelVariant::Heading)
+            }
+            Section(title: "Chips · filters (click toggles)".to_string()) {
             View(flex_direction: FlexDirection::Row, margin_top: 1) {
                 #(["active", "idle", "archived"].iter().map(|filter| {
                     let on = active_filters.iter().any(|f| f == filter);
@@ -57,18 +57,19 @@ pub fn IndicatorsPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
                     element! { Chip(key: key, label: format!("{} {}", if on { Glyphs::ON } else { Glyphs::OFF }, filter), tone: if on { ChipTone::Accent } else { ChipTone::Default }, on_press: move |_| toggle_filter(name.clone())) }
                 }))
             }
-            View(height: 1)
-            Label(content: "Chips · status tones", variant: LabelVariant::Heading)
+            }
+            Section(title: "Chips · status tones".to_string()) {
             View(flex_direction: FlexDirection::Row, margin_top: 1) {
                 Chip(label: "running", tone: ChipTone::Success) Chip(label: "degraded", tone: ChipTone::Warning) Chip(label: "failed", tone: ChipTone::Error) Chip(label: "v0.1.0")
             }
-            View(height: 1)
-            Label(content: "Spinners", variant: LabelVariant::Heading)
+            }
+            Section(title: "Spinners".to_string()) {
             View(flex_direction: FlexDirection::Column, margin_top: 1) {
                 Spinner(kind: SpinnerKind::Dots, label: "dots · syncing projects…".to_string())
                 Spinner(kind: SpinnerKind::Line, label: "line · building".to_string())
                 Spinner(kind: SpinnerKind::Bounce, label: "bounce · waiting for upstream".to_string())
                 Spinner(kind: SpinnerKind::Dots, label: "inactive · shows the on glyph".to_string(), active: false)
+            }
             }
         }
     }

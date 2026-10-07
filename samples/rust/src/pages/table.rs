@@ -1,4 +1,4 @@
-use garage49_tui_iocraft::{Binding, Column, MainFocus, Row, Table, UseKeys, UseStatus};
+use garage49_tui_iocraft::{Binding, Column, MainFocus, Row, Table, UseKeys, UseStatus, Section};
 use iocraft::prelude::*;
 
 fn rows() -> Vec<Row> {
@@ -26,8 +26,10 @@ pub fn TablePage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let click = move |row: Row| { let mut selected = selected; selected.set(Some(row.id.clone())); status.report(&format!("open: {}", row.id)); };
     let wheel = move |row: Row| { let mut selected = selected; selected.set(Some(row.id)); };
     element! {
+        Section(title: "Projects".to_string()) {
         View(flex_direction: FlexDirection::Column) {
             Table(columns: columns, rows: all, selected_id: current, focused: focused, on_click: click, on_select: wheel)
+        }
         }
     }
 }

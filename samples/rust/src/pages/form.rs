@@ -29,9 +29,8 @@ pub fn FormPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let checks_now = checks.get();
     element! {
         View(flex_direction: FlexDirection::Column, flex_shrink: 0.0_f32) {
-            Label(content: "↑↓ fields (and radio options) · space chooses/toggles/opens · ←→ cycles a select", variant: LabelVariant::Muted)
-            View(height: 1)
             Section(title: "Project".to_string()) {
+            Label(content: "↑↓ fields (and radio options) · space chooses/toggles/opens · ←→ cycles a select", variant: LabelVariant::Muted)
             Form {
             TextField(label: "Project name", value: name.read().clone(), on_change: move |v: String| { let mut name = name; name.set(v) }, focused: is("name"), on_focus: focus_on("name"))
             TextField(label: "Path", value: path.read().clone(), placeholder: "~/work/…".to_string(), on_change: move |v: String| { let mut path = path; path.set(v) }, focused: is("path"), on_focus: focus_on("path"))

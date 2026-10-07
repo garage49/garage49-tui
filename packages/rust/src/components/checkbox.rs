@@ -34,9 +34,11 @@ pub fn Checkbox(props: &mut CheckboxProps, mut hooks: Hooks) -> impl Into<AnyEle
     }
     hooks.use_keys(props.focused, vec![Binding::new(&["space", "enter"], move || (on_change.lock().expect("handler"))(!checked))], None);
     let focused = props.focused;
+    let surface = hooks.try_use_context::<RegionSurface>().map(|s| *s).unwrap_or_default();
     element! {
         View(flex_direction: FlexDirection::Row, height: 1) {
-            FieldBar(focused: focused, surface: RegionSurface::Background)
+            FieldBar(focused: focused, surface: surface)
+            Text(content: " ")
             Text(content: format!("{} ", if checked { Glyphs::CHECKED } else { Glyphs::UNCHECKED }), weight: Weight::Bold, color: if checked { t.success } else { t.text_muted })
             Text(content: props.label.clone(), color: if focused { t.text } else { t.text_muted })
         }

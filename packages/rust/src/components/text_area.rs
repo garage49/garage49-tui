@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use iocraft::prelude::*;
 
+use super::editing::UseEditing;
 use super::field_bar::FieldBar;
 use super::form::UseFormLayout;
 use super::scrollbar::Scrollbar;
@@ -31,7 +32,8 @@ pub struct TextAreaProps {
 pub fn TextArea(props: &mut TextAreaProps, mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let theme = hooks.use_context::<Theme>().clone();
     let t = theme.tokens;
-    hooks.use_typing(props.focused);
+    let editing = hooks.use_editing(props.focused);
+    hooks.use_typing(editing.editing);
     let (label_col, _) = hooks.use_form_field(&props.label, props.label_width, None);
     let buffer = props.buffer.clone().unwrap_or_else(|| TextBuffer::from_text(""));
     let rows = props.rows.unwrap_or(5).max(1) as usize;
@@ -56,7 +58,10 @@ pub fn TextArea(props: &mut TextAreaProps, mut hooks: Hooks) -> impl Into<AnyEle
         let mut on_focus = props.on_focus.take();
         let mut scroll_top = scroll_top;
         hooks.use_mouse(allowed, move |event| match event.kind {
-            MouseEventKind::Down(_) => on_focus(()),
+            MouseEventKind::Down(_) => {
+                editing.resume();
+                on_focus(());
+            }
             MouseEventKind::ScrollUp => scroll_top.set(top.saturating_sub(3)),
             MouseEventKind::ScrollDown => scroll_top.set((top + 3).min(max_top)),
             _ => {}
@@ -104,7 +109,7 @@ pub fn TextArea(props: &mut TextAreaProps, mut hooks: Hooks) -> impl Into<AnyEle
         }
     };
     hooks.use_keys(
-        props.focused,
+        editing.editing,
         vec![
             Binding::new(&["up"], up),
             Binding::new(&["down"], down),
@@ -119,7 +124,7 @@ pub fn TextArea(props: &mut TextAreaProps, mut hooks: Hooks) -> impl Into<AnyEle
         ],
         Some(Box::new(typed)),
     );
-    let focused = props.focused;
+    let focused = editing.editing;
     let empty = buffer.text().is_empty() && !focused;
     let placeholder = props.placeholder.clone().unwrap_or_default();
     let lines: Vec<AnyElement<'static>> = (0..rows)

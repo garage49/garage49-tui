@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use garage49_tui_iocraft::{Binding, Label, LabelVariant, LogEntry, LogLevel, LogView, MainFocus, UseKeys, UseStatus};
+use garage49_tui_iocraft::{Binding, Label, LabelVariant, LogEntry, LogLevel, LogView, MainFocus, UseKeys, UseStatus, Section};
 use iocraft::prelude::*;
 
 const MESSAGES: [(LogLevel, &str); 7] = [
@@ -51,6 +51,7 @@ pub fn LogPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let count = entries.read().len();
     let scroll = move |value: u32| { let mut offset = offset; offset.set(value); };
     element! {
+        Section(title: "Server log".to_string(), grow: true) {
         View(flex_direction: FlexDirection::Column, flex_grow: 1.0_f32) {
             View(flex_direction: FlexDirection::Row) {
                 Label(content: format!("{count} entries · "), variant: LabelVariant::Muted)
@@ -60,6 +61,7 @@ pub fn LogPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
             }
             View(height: 1)
             LogView(entries: entries.read().clone(), offset: current, on_scroll: scroll, rows: 20u16)
+        }
         }
     }
 }

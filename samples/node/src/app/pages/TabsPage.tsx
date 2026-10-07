@@ -1,7 +1,7 @@
 import {Box} from 'ink';
 import {useState} from 'react';
 import type {PageProps} from './Page.js';
-import {Label, Tabs, useKeys} from '@garage49/garage49-tui-ink';
+import {Label, Tabs, useKeys, Section} from '@garage49/garage49-tui-ink';
 import type {Tab} from '@garage49/garage49-tui-ink';
 
 const tabs: readonly Tab[] = [
@@ -29,12 +29,13 @@ export function TabsPage({focused, report}: PageProps) {
   ], {isActive: focused});
   return (
     <Box flexDirection="column">
-      <Label variant="muted">small · inside pages</Label>
-      <Tabs tabs={tabs} activeId={activeId} focused={focused} onChange={select} />
-      <Box paddingX={2} paddingY={1}><Label>{bodies[activeId]}</Label></Box>
-      <Box height={1} />
-      <Label variant="muted">large · the top navigation</Label>
-      <Tabs tabs={tabs} activeId={activeId} focused={focused} size="large" onChange={select} />
+      <Section title="small · inside pages">
+        <Tabs tabs={tabs} activeId={activeId} focused={focused} onChange={select} />
+        <Box paddingX={2} paddingY={1}><Label>{bodies[activeId]}</Label></Box>
+      </Section>
+      <Section title="large · the top navigation">
+        <Tabs tabs={tabs} activeId={activeId} focused={focused} size="large" onChange={select} />
+      </Section>
     </Box>
   );
 }

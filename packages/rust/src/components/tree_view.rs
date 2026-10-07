@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use iocraft::prelude::*;
 
+use super::truncate::Truncate;
 use crate::input::{MouseLayer, UseMouse};
 use crate::theme::{Glyphs, Theme};
 
@@ -46,9 +47,9 @@ impl TreeClick {
         if on_marker || already_selected { TreeClickAction::Toggle } else { TreeClickAction::Select }
     }
 
-    /// Whether column `x` of a row at `depth` is the marker cell (after the row padding and the indent).
+    /// Whether column `x` of a row at `depth` is the marker cell (after the indent).
     pub fn is_marker(x: i32, depth: usize) -> bool {
-        x == 1 + depth as i32 * 2
+        x == depth as i32 * 2
     }
 }
 
@@ -154,9 +155,9 @@ pub fn TreeView(props: &mut TreeViewProps, mut hooks: Hooks) -> impl Into<AnyEle
                 let marker = match row.node.children { Some(_) => if row.expanded { Glyphs::EXPANDED } else { Glyphs::COLLAPSED }, None => " " };
                 let prefix = format!("{}{} ", "  ".repeat(row.depth), marker);
                 element! {
-                    View(key: index, background_color: fill, padding_left: 1, padding_right: 1, flex_direction: FlexDirection::Row) {
+                    View(key: index, background_color: fill, flex_direction: FlexDirection::Row) {
                         Text(content: prefix, color: if highlighted { t.selection_text } else { t.text_muted })
-                        Text(content: row.node.label.clone(), weight: if is_selected { Weight::Bold } else { Weight::Normal }, color: if highlighted { t.selection_text } else { t.text }, wrap: TextWrap::NoWrap)
+                        Truncate(content: row.node.label.clone(), weight: if is_selected { Weight::Bold } else { Weight::Normal }, color: if highlighted { t.selection_text } else { t.text })
                     }
                 }
             }))
@@ -197,6 +198,6 @@ mod tests {
         assert_eq!(TreeClick::decide(false, false), TreeClickAction::Select);
         assert_eq!(TreeClick::decide(true, false), TreeClickAction::Toggle);
         assert_eq!(TreeClick::decide(false, true), TreeClickAction::Toggle);
-        assert!(TreeClick::is_marker(1, 0) && TreeClick::is_marker(3, 1) && !TreeClick::is_marker(4, 1));
+        assert!(TreeClick::is_marker(0, 0) && TreeClick::is_marker(2, 1) && !TreeClick::is_marker(3, 1));
     }
 }

@@ -11,7 +11,7 @@ export function MessageDialog({title, message, variant = 'default', onClose}: Pr
   useKeys([{keys: ['esc', 'enter'], run: onClose}]);
   return (
     <Overlay title={title} width={50} variant={variant}>
-      <Box paddingX={1}><Label>{message}</Label></Box>
+      <Box><Label>{message}</Label></Box>
       <Box height={1} />
       <Box flexDirection="row" justifyContent="flex-end">
         <Button label="OK" selected onPress={onClose} />

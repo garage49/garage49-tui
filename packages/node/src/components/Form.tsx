@@ -25,12 +25,14 @@ export const MIN_LABEL_WIDTH = 12;
 
 /**
  * A group of fields that share one label column and one value column. The label column is as wide
- * as the longest label (plus two cells, at least 12); the value column is the rest of the width, so
- * every text field, select and text area in the form is exactly as wide as its neighbours.
+ * as the longest label plus two cells, rounded up to an even number and at least 12; the value column
+ * is the rest of the width, so every text field, select and text area in the form is exactly as wide
+ * as its neighbours.
  */
 export function Form({children, width = 60}: Props) {
   const labels = Children.toArray(children).flatMap(child => (isValidElement<{label?: string}>(child) && typeof child.props.label === 'string' ? [child.props.label] : []));
-  const labelWidth = Math.max(MIN_LABEL_WIDTH, TextWidth.widest(labels) + 2);
+  // Indents move in steps of two cells, so the label column is rounded up to an even width.
+  const labelWidth = Math.ceil(Math.max(MIN_LABEL_WIDTH, TextWidth.widest(labels) + 2) / 2) * 2;
   const valueWidth = Math.max(8, width - labelWidth - 1);
   return (
     <FormContext.Provider value={{labelWidth, valueWidth}}>

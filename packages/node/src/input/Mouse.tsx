@@ -24,6 +24,7 @@ type Target = {
  */
 export class MouseRouter {
   private targets: Target[] = [];
+  private observers: Array<{ref: RefObject<DOMElement | null>; onPressOutside: RefObject<() => void>}> = [];
   private nextId = 0;
 
   register(layer: number, ref: RefObject<DOMElement | null>, handlers: RefObject<MouseHandlers>): () => void {
@@ -34,17 +35,32 @@ export class MouseRouter {
     };
   }
 
+  /** Calls `onPressOutside` for every press that lands outside the box behind `ref` (an editing field ends on it). */
+  observe(ref: RefObject<DOMElement | null>, onPressOutside: RefObject<() => void>): () => void {
+    const observer = {ref, onPressOutside};
+    this.observers.push(observer);
+    return () => {
+      this.observers = this.observers.filter(candidate => candidate !== observer);
+    };
+  }
+
+  private notifyOutside(event: MouseEvent): void {
+    for (const observer of this.observers) {
+      if (observer.ref.current && !hits(observer.ref, event)) observer.onPressOutside.current();
+    }
+  }
+
   dispatch(event: MouseEvent): void {
     if (event.kind !== 'press' && event.kind !== 'wheel-up' && event.kind !== 'wheel-down') return;
-    const hits = this.targets.flatMap(target => {
-      if (!target.ref.current) return [];
-      const rect = measureElement(target.ref.current);
-      const inside = event.x >= rect.x && event.x < rect.x + rect.width && event.y >= rect.y && event.y < rect.y + rect.height;
-      return inside ? [{target, rect, area: rect.width * rect.height}] : [];
+    if (event.kind === 'press') this.notifyOutside(event);
+    const under = this.targets.flatMap(target => {
+      if (!hits(target.ref, event)) return [];
+      const rect = measureElement(target.ref.current!);
+      return [{target, rect, area: rect.width * rect.height}];
     });
-    if (hits.length === 0) return;
-    const topLayer = Math.max(...hits.map(hit => hit.target.layer));
-    const ordered = hits.filter(hit => hit.target.layer === topLayer).sort((a, b) => a.area - b.area || b.target.id - a.target.id);
+    if (under.length === 0) return;
+    const topLayer = Math.max(...under.map(hit => hit.target.layer));
+    const ordered = under.filter(hit => hit.target.layer === topLayer).sort((a, b) => a.area - b.area || b.target.id - a.target.id);
     for (const {target, rect} of ordered) {
       const local = {...event, localX: event.x - rect.x, localY: event.y - rect.y};
       const handler = event.kind === 'press' ? target.handlers.current.onPress : target.handlers.current.onWheel;
@@ -54,6 +70,13 @@ export class MouseRouter {
 }
 
 const RouterContext = createContext<MouseRouter | null>(null);
+
+/** A press lies inside the box behind `ref`. */
+function hits(ref: RefObject<DOMElement | null>, event: MouseEvent): boolean {
+  if (!ref.current) return false;
+  const rect = measureElement(ref.current);
+  return event.x >= rect.x && event.x < rect.x + rect.width && event.y >= rect.y && event.y < rect.y + rect.height;
+}
 const LayerContext = createContext(0);
 
 export type MouseSwitch = {readonly enabled: boolean; setEnabled: (enabled: boolean) => void};
@@ -101,6 +124,14 @@ export function MouseProvider({children, initiallyEnabled = true}: {children: Re
 /** Puts its children on a higher mouse layer: an overlay's targets win over the screen below. */
 export function MouseLayer({layer, children}: {layer: number; children: ReactNode}) {
   return <LayerContext.Provider value={layer}>{children}</LayerContext.Provider>;
+}
+
+/** Calls `onPressOutside` for every press outside the box behind `ref` for as long as the component is mounted. */
+export function useMouseOutside(ref: RefObject<DOMElement | null>, onPressOutside: () => void): void {
+  const router = useContext(RouterContext);
+  const latest = useRef(onPressOutside);
+  latest.current = onPressOutside;
+  useEffect(() => router?.observe(ref, latest), [router, ref]);
 }
 
 /** Registers the box behind `ref` as a mouse target for as long as the component is mounted. */

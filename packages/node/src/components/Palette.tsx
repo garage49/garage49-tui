@@ -32,7 +32,7 @@ export function Palette({title, items, onPick, onClose}: Props) {
 
   return (
     <Overlay title={title}>
-      <Box paddingX={1}>
+      <Box>
         <Text color={query ? theme.tokens.text : theme.tokens.textMuted}>{query || 'Search'}█</Text>
       </Box>
       <Box height={1} />

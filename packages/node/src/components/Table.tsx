@@ -44,14 +44,14 @@ export function Table<Row>({columns, rows, rowId, selectedId, focused = true, on
     ));
   return (
     <Box ref={box} flexDirection="column">
-      <Box flexDirection="row" paddingX={1}>{line(columns.map(column => column.title), theme.tokens.textMuted, true)}</Box>
+      <Box flexDirection="row">{line(columns.map(column => column.title), theme.tokens.textMuted, true)}</Box>
       {rows.map(row => {
         const id = rowId(row);
         const selected = id === selectedId;
         const highlighted = selected && focused;
         const fill = selected ? (focused ? theme.tokens.selectionBackground : theme.tokens.surfaceRaised) : undefined;
         return (
-          <Box key={id} flexDirection="row" paddingX={1} backgroundColor={fill}>
+          <Box key={id} flexDirection="row" backgroundColor={fill}>
             {line(columns.map(column => column.cell(row)), highlighted ? theme.tokens.selectionText : theme.tokens.text, selected)}
           </Box>
         );

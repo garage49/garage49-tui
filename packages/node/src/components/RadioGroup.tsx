@@ -5,6 +5,7 @@ import {useMouseTarget} from '../input/Mouse.js';
 import {Glyphs} from '../theme/Glyphs.js';
 import {useTheme} from '../theme/ThemeContext.js';
 import {FieldBar} from './FieldBar.js';
+import {useSurface} from './FocusRegion.js';
 import {useFieldColumns} from './Form.js';
 import type {ListItem} from './List.js';
 
@@ -50,7 +51,7 @@ export function RadioGroup({label, options, value, onChange, focused = false, on
   return (
     <Box ref={box} flexDirection="row" height={options.length}>
       <Box width={labelCol} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
-      <FieldBar focused={focused} surface="background" rows={options.length} />
+      <FieldBar focused={focused} surface={useSurface()} rows={options.length} />
       <Box flexDirection="column">
         {options.map((option, index) => {
           const chosen = option.id === value;

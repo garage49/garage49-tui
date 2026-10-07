@@ -32,7 +32,7 @@ pub fn HelpOverlay(props: &mut HelpOverlayProps, mut hooks: Hooks) -> impl Into<
     let key_width = TextWidth::widest(props.entries.iter().map(|e| e.keys.as_str())) as u16 + 2;
     element! {
         Overlay(title: "Help") {
-            View(flex_direction: FlexDirection::Column, padding_left: 1, padding_right: 1) {
+            View(flex_direction: FlexDirection::Column) {
                 #(props.entries.iter().enumerate().map(|(index, entry)| element! {
                     View(key: index, flex_direction: FlexDirection::Row) {
                         View(width: key_width, flex_shrink: 0.0_f32) { Text(content: entry.keys.clone(), color: t.text) }

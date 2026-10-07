@@ -1,0 +1,7 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`MasterDetail > puts the list on the left third and the detail, padded, on the right 1`] = `
+"garage49-tui       2 min ago
+adoc               yesterday   Path  ~/work/adoc
+"
+`;

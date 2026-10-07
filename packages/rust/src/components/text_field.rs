@@ -1,5 +1,6 @@
 use iocraft::prelude::*;
 
+use super::editing::UseEditing;
 use super::field_bar::FieldBar;
 use super::form::UseFormLayout;
 use crate::input::{Binding, MouseLayer, UseKeys, UseMouse};
@@ -24,12 +25,14 @@ pub struct TextFieldProps {
 pub fn TextField(props: &mut TextFieldProps, mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let theme = hooks.use_context::<Theme>().clone();
     let t = theme.tokens;
-    hooks.use_typing(props.focused);
+    let editing = hooks.use_editing(props.focused);
+    hooks.use_typing(editing.editing);
     let (label_col, _) = hooks.use_form_field(&props.label, props.label_width, None);
     let allowed = hooks.mouse_allowed(MouseLayer::Screen);
     let mut on_focus = props.on_focus.take();
     hooks.use_mouse(allowed, move |event| {
         if matches!(event.kind, MouseEventKind::Down(_)) {
+            editing.resume();
             on_focus(());
         }
     });
@@ -54,8 +57,8 @@ pub fn TextField(props: &mut TextFieldProps, mut hooks: Hooks) -> impl Into<AnyE
             (on_change.lock().expect("handler"))(next.clone());
         }
     };
-    hooks.use_keys(props.focused, vec![Binding::new(&["backspace", "delete"], backspace)], Some(Box::new(typed)));
-    let focused = props.focused;
+    hooks.use_keys(editing.editing, vec![Binding::new(&["backspace", "delete"], backspace)], Some(Box::new(typed)));
+    let focused = editing.editing;
     let shown = if value.is_empty() { props.placeholder.clone().unwrap_or_default() } else if props.secret { "*".repeat(value.chars().count()) } else { value.clone() };
     let content = format!("{shown}{}", if focused { Glyphs::CURSOR } else { "" });
     element! {

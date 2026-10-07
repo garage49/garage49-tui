@@ -1,7 +1,7 @@
 import {Box} from 'ink';
 import {useState} from 'react';
 import type {PageProps} from './Page.js';
-import {Table, useKeys} from '@garage49/garage49-tui-ink';
+import {Section, Table, useKeys} from '@garage49/garage49-tui-ink';
 import type {Column} from '@garage49/garage49-tui-ink';
 
 type Project = {readonly name: string; readonly language: string; readonly files: number; readonly status: string};
@@ -31,6 +31,7 @@ export function TablePage({focused, report}: PageProps) {
     {keys: ['enter'], run: () => selected && report(`open: ${selected}`)},
   ], {isActive: focused});
   return (
+    <Section title="Projects">
     <Box flexDirection="column">
       <Table
         columns={columns}
@@ -42,5 +43,6 @@ export function TablePage({focused, report}: PageProps) {
         onSelect={p => setSelected(p.name)}
       />
     </Box>
+    </Section>
   );
 }

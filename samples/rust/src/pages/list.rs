@@ -1,4 +1,4 @@
-use garage49_tui_iocraft::{Binding, List, ListItem, MainFocus, Selection, UseKeys, UseStatus};
+use garage49_tui_iocraft::{Binding, List, ListItem, MainFocus, Selection, UseKeys, UseStatus, Section};
 use iocraft::prelude::*;
 
 fn items() -> Vec<ListItem> {
@@ -41,10 +41,12 @@ pub fn ListPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let mut select_state = selected;
     let mut click_state = selected;
     element! {
+        Section(title: "Recent projects and actions".to_string()) {
         View(flex_direction: FlexDirection::Column, width: 56) {
             List(items: items, selected_id: current, focused: focused,
                 on_click: move |item: ListItem| { click_state.set(Some(item.id.clone())); status.report(&format!("activated: {}", item.label)); },
                 on_select: move |item: ListItem| select_state.set(Some(item.id)))
+        }
         }
     }
 }

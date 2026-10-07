@@ -1,10 +1,10 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`List > renders sections, a blank line between them, and right-aligned shortcuts 1`] = `
-" Suggested
- Switch model                  ctrl+x m
- 한글 항목
+"Suggested
+Switch model                    ctrl+x m
+한글 항목
 
- Session
- New session                   ctrl+x n"
+Session
+New session                     ctrl+x n"
 `;

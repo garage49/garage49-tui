@@ -1,5 +1,6 @@
 import {Box, Text, type DOMElement} from 'ink';
 import {useRef} from 'react';
+import {useEditing} from './Editing.js';
 import {useKeys} from '../input/Keys.js';
 import {useMouseTarget} from '../input/Mouse.js';
 import {useTyping} from '../shell/Typing.js';
@@ -23,9 +24,10 @@ type Props = {
 export function TextField({label, value, onChange, placeholder = '', focused = false, onFocus, labelWidth, secret = false}: Props) {
   const theme = useTheme();
   const {labelCol} = useFieldColumns(labelWidth);
-  useTyping(focused);
   const box = useRef<DOMElement>(null);
-  useMouseTarget(box, {onPress: () => onFocus?.()});
+  const {editing, resume} = useEditing(box, focused);
+  useTyping(editing);
+  useMouseTarget(box, {onPress: () => { resume(); onFocus?.(); }});
   // Keys faster than renders chain on `pending`, not on the value captured at the last render.
   const pending = useRef(value);
   pending.current = value;
@@ -35,13 +37,13 @@ export function TextField({label, value, onChange, placeholder = '', focused = f
   };
   useKeys([
     {keys: ['backspace', 'delete'], run: () => emit(pending.current.slice(0, -1))},
-  ], {isActive: focused, onText: text => emit(pending.current + text)});
+  ], {isActive: editing, onText: text => emit(pending.current + text)});
   return (
     <Box ref={box} flexDirection="row" height={1}>
-      <Box width={labelCol} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
-      <FieldBar focused={focused} />
+      <Box width={labelCol} flexShrink={0}><Text color={editing ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
+      <FieldBar focused={editing} />
       <Box flexGrow={1} backgroundColor={theme.tokens.surface} paddingX={1}>
-        <Text color={value ? theme.tokens.text : theme.tokens.textMuted} wrap="truncate-end">{shownText(value, placeholder, secret)}{focused ? '█' : ''}</Text>
+        <Text color={value ? theme.tokens.text : theme.tokens.textMuted} wrap="truncate-end">{shownText(value, placeholder, secret)}{editing ? '█' : ''}</Text>
       </Box>
     </Box>
   );

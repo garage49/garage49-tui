@@ -1,8 +1,20 @@
 import {Box, Text, useBoxMetrics, type DOMElement} from 'ink';
-import {useRef, type ReactNode} from 'react';
+import {createContext, useContext, useRef, type ReactNode} from 'react';
 import {useTheme} from '../theme/ThemeContext.js';
 
 export type RegionSurface = 'background' | 'panel' | 'surface' | 'heading';
+
+const SurfaceContext = createContext<RegionSurface>('background');
+
+/** Tells the fields inside which color their container draws, so a bar-only field paints its bar column on it. */
+export function SurfaceProvider({surface, children}: {surface: RegionSurface; children: ReactNode}) {
+  return <SurfaceContext.Provider value={surface}>{children}</SurfaceContext.Provider>;
+}
+
+/** The color of the nearest container: a Section's panel, a MasterDetail detail's surface, an Overlay's panel, else the background. */
+export function useSurface(): RegionSurface {
+  return useContext(SurfaceContext);
+}
 
 type Props = {
   focused: boolean;

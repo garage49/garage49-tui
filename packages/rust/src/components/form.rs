@@ -29,7 +29,8 @@ impl FormLayout {
 
     /// Called by a field with its label: grows the column when a wider label appears.
     pub fn register(&self, label: &str) {
-        let needed = (TextWidth::of(label) as u16 + 2).max(MIN_LABEL_WIDTH);
+        // Indents move in steps of two cells, so the label column is rounded up to an even width.
+        let needed = (TextWidth::of(label) as u16 + 2).max(MIN_LABEL_WIDTH).div_ceil(2) * 2;
         let mut widest = self.widest.lock().expect("form");
         if needed > *widest {
             *widest = needed;

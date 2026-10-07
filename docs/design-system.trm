@@ -37,6 +37,59 @@ procedure _Dim_Theme_ = {
   - _Dim_Theme_ must apply to the whole screen below the _Overlay_, including the focus bar and any cursor.
 }
 
+concept _Token_ = {
+  One named semantic color of a _Theme_ (text, textMuted, textBright, accent, accentSecondary, heading, success, warning, error, background, panel, surface, surfaceRaised, selectionBackground, selectionText); components name tokens, never raw colors.
+.relations
+  belongs to _Theme_
+  governed by _Color_Role_
+.contract
+  - A _Token_ name must be the only way a component refers to a color.
+}
+
+concept _Screen_ = {
+  The full-window root under an _App_Frame_: it fills the terminal with the background token, hosts the one _Overlay_ slot and owns _Mouse_Reporting_.
+.relations
+  part of _App_Frame_
+  hosts _Overlay_
+  owns _Mouse_Reporting_
+.contract
+  - A _Screen_ must be the only element that paints the terminal background and the only host of an _Overlay_.
+}
+
+concept _Content_ = {
+  The row of an _App_Frame_ between the _Navigation_Header_ and the bottom bars: an optional _Sidebar_ and the _Main_Page_ side by side.
+.relations
+  below _Navigation_Header_
+  part of _App_Frame_
+  has_part _Sidebar_
+  has_part _Main_Page_
+.contract
+  - A _Content_ must keep only its first child, the _Sidebar_, when the terminal is narrower than 64 columns.
+}
+
+concept _View_ = {
+  One top-level area of an application, chosen with a large tab in the _Navigation_Header_; a view has a _Sidebar_ of pages or a single page.
+.relations
+  chosen in _Navigation_Header_
+  contains _Page_
+  has_part _Sidebar_
+.contract
+  - Exactly one _View_ must be active at a time; ← and → switch it while the header owns the keyboard.
+}
+
+concept _Page_ = {
+  What fills the _Main_Page_: one item of a _Sidebar_ (or the whole of a _View_ without a sidebar), composed of an optional _Intro_ and sections.
+.relations
+  marked by _Cursor_
+  opens with _Intro_
+  belongs to _View_
+  listed in _Sidebar_
+  shown in _Main_Page_
+  follows _Layout_Rhythm_
+.contract
+  - Exactly one _Page_ must be current per _View_; the _Sidebar_ keeps its _Cursor_ on it.
+}
+
 concept _Color_Role_ = {
   The fixed meaning of each color token, so that a color tells the reader what a thing is.
 .relations
@@ -80,11 +133,19 @@ concept _Region_ = {
   shows _Focus_Bar_
   cycled by _Cycle_Focus_
   has_member _Cursor_
+  names _View_
+  names _Page_
+  names _Field_
+  names _Tabs_
+  names _Radio_Group_
+  names _Checkbox_
+  names _Editing_
 .contract
   - A _Region_ must keep its first column free of content.
   - A _Region_ must show the _Focus_Bar_ while it owns the keyboard and nothing in its first column otherwise.
   - A _Region_ must react to keys only while it owns the keyboard and no _Overlay_ is open.
   - A click inside a _Region_ must give it the keyboard.
+  - The state words must keep their one meaning each and are never swapped: focused is a _Region_ that owns the keyboard; active is the _View_ shown by _Tabs_; current is the _Page_ of a _View_ or the _Field_ of a page; selected is the item under the _Cursor_; chosen is the value of a _Radio_Group_ or _Checkbox_; editing is a text _Field_ in _Editing_.
 .remarks
   Chosen: the focus bar is painted over the region's own first column instead of taking a column of its own, so the logo block can start at the screen edge and the bar reads as the region's inner edge.
 }
@@ -116,7 +177,7 @@ procedure _Cycle_Focus_ = {
 }
 
 concept _Cursor_ = {
-  The one selected item inside a focused _Region_: a list row, table row, tree row, radio option, chip, button or active tab.
+  The one item a _Region_ points at: a list row, table row, tree row, radio option, chip, button or active tab; filled in accent while the region owns the keyboard, kept as a raised fill otherwise. In code the same item is the selection (`selectedId`, the selectionBackground and selectionText tokens); the two words name one thing.
 .relations
   belongs to _Region_
   marked by _Color_Role_
@@ -253,6 +314,28 @@ concept _Key_Hint_Bar_ = {
   - The built-in pairs must be tab focus, ctrl+p commands, ? help and q quit, after the application's own.
 }
 
+concept _Field_Bar_ = {
+  The _Focus_Bar_ at field scale: the first column of a _Field_, blank normally and a ┃ in accentSecondary down every row while the field is editing.
+.relations
+  is_a _Focus_Bar_
+  part of _Field_
+.contract
+  - A _Field_Bar_ must be painted on the color under it: the field's value surface, or the container's color for a field without one.
+}
+
+concept _Editing_ = {
+  The state of a text _Field_ that shows its cursor and receives the keys: it is the current field of its page and no click has landed outside it since it became current.
+.relations
+  state of _Field_
+  state of _Text_Field_
+  state of _Text_Area_
+  state of _Input_Box_
+  declared as _Typing_State_
+.contract
+  - At most one _Field_ must be editing at a time; while one is, _Typing_State_ is declared.
+  - A click outside an editing _Field_ must end _Editing_; a click on the field or ↑↓ returning to it must start it anew.
+}
+
 concept _Field_ = {
   A one-row or multi-row form input with a label at the left, a field bar and a value on a surface.
 .relations
@@ -263,11 +346,16 @@ concept _Field_ = {
   has_member _Toggle_
   has_member _Checkbox_
   has_member _Radio_Group_
+  placed on _Section_
+  placed on _Master_Detail_
+  placed on _Overlay_
 .contract
   - A _Field_ must draw its label in the text token while editing and textMuted otherwise, with a label width of 14 cells by default.
   - A _Field_ must show a ┃ in accentSecondary on its surface's first column for every row while editing and a blank cell otherwise.
   - A multi-row _Field_ must hand the keyboard to the previous field on ↑ at its first row and to the next field on ↓ at its last row.
   - A click on a _Field_ must make it the editing field.
+  - A click outside an editing text _Field_ must end its editing: the cursor and the field bar disappear and the keys return to the application; a click on the field, or the field becoming the current field again, must start editing anew.
+  - A _Field_ without a value surface (_Checkbox_, _Radio_Group_) must paint its bar column in the color of the container it sits in: a _Section_'s panel, a _Master_Detail_ detail's surface, an _Overlay_'s panel, else the background. The container provides that color; the field never guesses it.
 }
 
 concept _Layout_Rhythm_ = {
@@ -276,30 +364,89 @@ concept _Layout_Rhythm_ = {
   applied by _Section_
   applied by _Split_
   applied by _Form_
+  applied by _Master_Detail_
+  applied by _Intro_
+  constrains _Tabs_
+  places _Cursor_
+  places _Focus_Bar_
 .contract
-  - A region or pane must pad two cells on the left and right and one row above and below its content.
-  - Adjacent panes must be one cell apart; adjacent sections must be one blank row apart; the fields of one form must be zero rows apart; a table or log must have one blank row above and below.
-  - A page must be composed of _Section_, _Split_, _Form_ and the data and field components; a page must not place padding or widths of its own on plain views.
+  - A region or _Section_ must pad two cells on the left and right and one row above and below its content.
+  - Sections side by side must be one cell apart; sections one under another must be one blank row apart; the fields of one form must be zero rows apart; a table or log must have one blank row above and below.
+  - A page must be composed of an optional _Intro_, then _Section_, _Split_, _Form_, _Master_Detail_ and the data and field components; a page must not place padding or widths of its own on plain views.
+  - Text starts at one of two columns counted from the region's edge: 2 for region content (the page title, a sidebar list, overlay content) and 4 for everything inside a _Section_ (its title and body alike).
+  - A row that can be selected must start at the same column as any other text; the _Cursor_ fill starts at that column, never one cell before it.
+  - Every indent is a multiple of two cells: a nested level (a tree depth, a checkbox or radio option under its heading, a field value after its _Focus_Bar_) steps two cells in, never one. A _Form_ rounds its label column up to an even width. One-cell spacing exists only inside a row, between a glyph and its text or between a key and its label.
   - All labels on a page must start in one column, and all values of one _Form_ must start in one column and share one width.
   - A text value column must be at least 24 cells wide; a URL or path takes the whole value column.
+  - Nothing must be drawn above a _Section_ title or above a row of _Tabs_; explanatory text goes below the title.
+  - A _Section_ must not contain another _Section_; a second level inside a section is a group heading (heading token, bold), which the section's header bar outranks.
+}
+
+concept _Header_Bar_ = {
+  The title row of a _Section_: bold text in textBright on the surfaceRaised token, across the whole block; the strongest heading on a page.
+.relations
+  part of _Section_
+  outranks _Group_Heading_
+.contract
+  - A _Header_Bar_ must appear only as the first row of a _Section_; no other element may draw a filled title row.
+}
+
+concept _Group_Heading_ = {
+  The second level of heading inside a _Section_: a bold line in the heading token with no fill, used by a _List_ section, a _Form_ group or a _Label_ of the heading variant.
+.relations
+  drawn by _Form_
+  outranked by _Header_Bar_
+  part of _Section_
+  drawn by _Label_
+  drawn by _List_
+.contract
+  - A _Group_Heading_ must never stand above a _Header_Bar_ or outside a _Section_.
 }
 
 concept _Section_ = {
   One titled area of a page: a heading, then its body directly under it.
 .relations
   applies _Layout_Rhythm_
+  distinguished from _Intro_
 .contract
-  - A _Section_ title must use the heading token in bold; the body must start on the next row without indent.
+  - A _Section_ must be a block on the panel token; its title must be a header bar across the block, bold text in textBright on surfaceRaised; the body must start on the next row at the title's column.
+  - Every _Section_ must have a title; a panel block without a header bar is an _Intro_, never a section.
   - A _Section_ must end with one blank row before whatever follows it.
 }
 
-concept _Split_ = {
-  Sub-panes placed side by side or stacked inside a page, each on its own surface.
+concept _Intro_ = {
+  A page's introduction: a block on the panel token with no header bar, holding one bright title line and a short muted explanation.
 .relations
   applies _Layout_Rhythm_
+  precedes _Section_
 .contract
-  - Panes must alternate the background and panel tokens so their edges show without lines; panes must be one cell apart and padded two cells by one row.
-  - Panes must share the space equally.
+  - An _Intro_ must stand at the top of a page, before its first _Section_; a page must have at most one, and nothing else may be a panel block without a header bar.
+  - An _Intro_ must hold only text: a title line in textBright (not bold, not a bar) and explanation in textMuted; it must not hold a list, a table, a field or a button.
+  - An explanation that belongs to one _Section_ goes inside that section as a muted line under its header bar, not in an _Intro_.
+}
+
+concept _Split_ = {
+  Sections placed side by side (or stacked) in a page; the split itself is invisible.
+.relations
+  applies _Layout_Rhythm_
+  arranges _Section_
+.contract
+  - Every child of a _Split_ must be a _Section_; the split must give them equal shares one cell apart and must draw no surface and no padding of its own, so that the only structure a reader sees is sections (header bars and panel blocks).
+  - A _Split_ must sit directly in the page, never inside a _Section_.
+}
+
+concept _Master_Detail_ = {
+  A list and the detail of its selected row as one control inside a section, drawn so that the two read as connected.
+.relations
+  applies _Layout_Rhythm_
+  contains _List_
+  shows _Cursor_
+  distinguished from _Split_
+  placed in _Section_
+.contract
+  - A _Master_Detail_ must sit inside one _Section_ (under one header bar): the list takes the left third, the detail the remaining two thirds on the surface token with the standard padding, and one cell lies between them.
+  - The selected row's fill must continue across that one cell into the detail, so the row and its detail form one shape; the fill is the _Cursor_ color while focused and the raised surface otherwise.
+  - Two independent lists or panels must use a _Split_ of sections instead; a _Master_Detail_ is only for a list and the detail of its selected row.
 }
 
 concept _Form_ = {
@@ -308,7 +455,7 @@ concept _Form_ = {
   applies _Layout_Rhythm_
   has_member _Field_
 .contract
-  - The label column must be as wide as the longest label plus two cells, and at least 12 cells.
+  - The label column must be as wide as the longest label plus two cells, rounded up to an even width, and at least 12 cells.
   - The value column must be the form's width minus the label column; every text field, select and text area in the form must fill it.
   - A _Form_ must be 60 cells wide unless the page gives another width.
 }

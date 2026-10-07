@@ -52,6 +52,8 @@ export {Button} from './components/Button.js';
 // Layout
 export {Section} from './components/Section.js';
 export {Split} from './components/Split.js';
+export {MasterDetail} from './components/MasterDetail.js';
+export {Intro} from './components/Intro.js';
 export {Form, useFormLayout, useFieldColumns, MIN_LABEL_WIDTH, type FormLayout} from './components/Form.js';
 
 // Text and indicators

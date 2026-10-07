@@ -53,7 +53,7 @@ pub fn ConfirmDialog(props: &mut ConfirmDialogProps, mut hooks: Hooks) -> impl I
     let variant = if props.danger { OverlayVariant::Error } else { OverlayVariant::Default };
     element! {
         Overlay(title: props.title.clone(), width: 50u16, variant: variant) {
-            View(padding_left: 1, padding_right: 1) { Label(content: props.message.clone()) }
+            View { Label(content: props.message.clone()) }
             View(height: 1)
             View(flex_direction: FlexDirection::Row, justify_content: JustifyContent::End) {
                 Button(label: props.cancel_label.clone().unwrap_or_else(|| "Cancel".into()), selected: !selected, on_press: move |_| cancel())

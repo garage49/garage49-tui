@@ -27,7 +27,7 @@ export function ConfirmDialog({title, message, confirmLabel = 'OK', cancelLabel 
   ]);
   return (
     <Overlay title={title} width={50} variant={danger ? 'error' : 'default'}>
-      <Box paddingX={1}><Label>{message}</Label></Box>
+      <Box><Label>{message}</Label></Box>
       <Box height={1} />
       <Box flexDirection="row" justifyContent="flex-end">
         <Button label={cancelLabel} selected={!confirmSelected} onPress={onCancel} />

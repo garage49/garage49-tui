@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use garage49_tui_iocraft::{Binding, MainFocus, TreeLayout, TreeNode, TreeRow, TreeView, UseKeys, UseStatus};
+use garage49_tui_iocraft::{Binding, MainFocus, TreeLayout, TreeNode, TreeRow, TreeView, UseKeys, UseStatus, Section};
 use iocraft::prelude::*;
 
 fn nodes() -> Vec<TreeNode> {
@@ -52,8 +52,10 @@ pub fn TreePage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let on_toggle = move |row: TreeRow| toggle(&row, None);
     let on_select = move |row: TreeRow| { let mut selected = selected; selected.set(Some(row.node.id)); };
     element! {
+        Section(title: "Files".to_string()) {
         View(flex_direction: FlexDirection::Column, width: 50) {
             TreeView(nodes: tree, expanded: expanded.read().clone(), selected_id: current_id, focused: focused, on_select: on_select, on_toggle: on_toggle)
+        }
         }
     }
 }

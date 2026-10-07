@@ -49,9 +49,8 @@ export function FormPage({focused, report}: PageProps) {
   const is = (candidate: Field) => focused && field === candidate;
   return (
     <Box flexDirection="column" flexShrink={0}>
-      <Label variant="muted">↑↓ fields (and radio options) · space chooses/toggles/opens · ←→ cycles a select</Label>
-      <Box height={1} />
       <Section title="Project">
+      <Label variant="muted">↑↓ fields (and radio options) · space chooses/toggles/opens · ←→ cycles a select</Label>
       <Form>
       <TextField label="Project name" value={name} onChange={setName} focused={is('name')} onFocus={() => setField('name')} />
       <TextField label="Path" value={path} onChange={setPath} placeholder="~/work/…" focused={is('path')} onFocus={() => setField('path')} />

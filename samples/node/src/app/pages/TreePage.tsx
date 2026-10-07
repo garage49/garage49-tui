@@ -1,7 +1,7 @@
 import {Box} from 'ink';
 import {useState} from 'react';
 import type {PageProps} from './Page.js';
-import {TreeLayout, TreeView, useKeys} from '@garage49/garage49-tui-ink';
+import {Section, TreeLayout, TreeView, useKeys} from '@garage49/garage49-tui-ink';
 import type {TreeNode, TreeRow} from '@garage49/garage49-tui-ink';
 
 const nodes: readonly TreeNode[] = [
@@ -62,6 +62,7 @@ export function TreePage({focused, report}: PageProps) {
   ], {isActive: focused});
 
   return (
+    <Section title="Files">
     <Box flexDirection="column" width={50}>
       <TreeView
         nodes={nodes}
@@ -72,5 +73,6 @@ export function TreePage({focused, report}: PageProps) {
         onToggle={row => toggle(row)}
       />
     </Box>
+    </Section>
   );
 }

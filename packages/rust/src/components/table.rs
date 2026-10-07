@@ -1,5 +1,6 @@
 use iocraft::prelude::*;
 
+use super::truncate::Truncate;
 use crate::input::{MouseLayer, UseMouse};
 use crate::theme::Theme;
 
@@ -88,7 +89,7 @@ pub fn Table(props: &mut TableProps, mut hooks: Hooks) -> impl Into<AnyElement<'
                     let text = cells.get(index).cloned().unwrap_or_default();
                     element! {
                         View(key: index, width: column.width, flex_shrink: 0.0_f32, margin_right: 2, justify_content: if column.align == Align::Right { JustifyContent::End } else { JustifyContent::Start }) {
-                            Text(content: text, weight: if bold { Weight::Bold } else { Weight::Normal }, color: color, wrap: TextWrap::NoWrap)
+                            Truncate(content: text, weight: if bold { Weight::Bold } else { Weight::Normal }, color: color, align_right: column.align == Align::Right)
                         }
                     }
                 }))
@@ -101,13 +102,13 @@ pub fn Table(props: &mut TableProps, mut hooks: Hooks) -> impl Into<AnyElement<'
     let selected = props.selected_id.clone();
     element! {
         View(flex_direction: FlexDirection::Column) {
-            View(padding_left: 1, padding_right: 1) { #(std::iter::once(header)) }
+            View { #(std::iter::once(header)) }
             #(props.rows.iter().enumerate().map(|(index, row)| {
                 let is_selected = selected.as_deref() == Some(row.id.as_str());
                 let highlighted = is_selected && focused;
                 let fill = if is_selected { Some(if focused { t.selection_background } else { t.surface_raised }) } else { None };
                 let body = line(row.cells.clone(), if highlighted { t.selection_text } else { t.text }, is_selected);
-                element! { View(key: index, padding_left: 1, padding_right: 1, background_color: fill) { #(std::iter::once(body)) } }
+                element! { View(key: index, background_color: fill) { #(std::iter::once(body)) } }
             }))
         }
     }

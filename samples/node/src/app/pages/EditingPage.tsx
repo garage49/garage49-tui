@@ -1,7 +1,7 @@
 import {Box} from 'ink';
 import {useState} from 'react';
 import type {PageProps} from './Page.js';
-import {Input, Label, TextArea, TextBuffer, useKeys} from '@garage49/garage49-tui-ink';
+import {Input, Label, TextArea, TextBuffer, useKeys, Section} from '@garage49/garage49-tui-ink';
 
 const fields = ['notes', 'command'] as const;
 type Field = (typeof fields)[number];
@@ -20,11 +20,12 @@ export function EditingPage({focused, report}: PageProps) {
 
   const is = (candidate: Field) => focused && field === candidate;
   return (
-    <Box flexDirection="column" width={64} flexShrink={0}>
+    <Box flexDirection="column" width={68} flexShrink={0}>
+      <Section title="Notes">
       <Label variant="muted">↑ on the first line / ↓ on the last line leaves the text area · click focuses</Label>
-      <Box height={1} />
       <TextArea label="Notes" buffer={notes} onChange={setNotes} rows={6} placeholder="Write several lines…" focused={is('notes')} onFocus={() => setField('notes')} onLeave={step} />
-      <Box height={1} />
+      </Section>
+      <Section title="Command">
       <Input
         value={command}
         onChange={setCommand}
@@ -34,6 +35,7 @@ export function EditingPage({focused, report}: PageProps) {
         onFocus={() => setField('command')}
         footer={<Label variant="muted">enter submits · the bar turns blue when focused</Label>}
       />
+      </Section>
     </Box>
   );
 }

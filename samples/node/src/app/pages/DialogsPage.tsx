@@ -1,7 +1,7 @@
 import {Box} from 'ink';
 import {useState} from 'react';
 import type {PageProps} from './Page.js';
-import {ConfirmDialog, List, MessageDialog, Palette, useOverlay, useKeys, Selection} from '@garage49/garage49-tui-ink';
+import {ConfirmDialog, List, MessageDialog, Palette, Section, useOverlay, useKeys, Selection} from '@garage49/garage49-tui-ink';
 import type {ListItem} from '@garage49/garage49-tui-ink';
 
 const sampleCommands: readonly ListItem[] = [
@@ -44,8 +44,10 @@ export function DialogsPage({focused, report}: PageProps) {
     {keys: ['enter'], run: () => { const item = items.find(candidate => candidate.id === selectedId); if (item) open(item); }},
   ], {isActive: focused});
   return (
+    <Section title="Open one">
     <Box flexDirection="column" width={50}>
       <List items={items} selectedId={selectedId} focused={focused} onClick={item => { setSelectedId(item.id); open(item); }} onSelect={item => setSelectedId(item.id)} />
     </Box>
+    </Section>
   );
 }

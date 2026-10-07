@@ -1,4 +1,4 @@
-use garage49_tui_iocraft::{Binding, Label, LabelVariant, ListItem, MainFocus, MouseState, Select, TextField, Theme, ThemeSwitch, Toggle, UseKeys, UseStatus};
+use garage49_tui_iocraft::{Binding, Form, Label, LabelVariant, ListItem, MainFocus, MouseState, Section, Select, TextField, Theme, ThemeSwitch, Toggle, UseKeys, UseStatus};
 use iocraft::prelude::*;
 
 const FIELDS: [&str; 4] = ["theme", "mouse", "vim", "minsize"];
@@ -21,20 +21,26 @@ pub fn SettingsPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let themes = vec![ListItem::new("opencode", "opencode (truecolor)"), ListItem::new("system", "system (ANSI 16)")];
     let theme_id = theme.name.trim_end_matches("-dimmed").to_string();
     element! {
-        View(flex_direction: FlexDirection::Column, width: 60) {
-            Label(content: "Appearance", variant: LabelVariant::Heading)
+        View(flex_direction: FlexDirection::Column, flex_shrink: 0.0_f32) {
+            Section(title: "Appearance".to_string()) {
+            Form {
             Select(label: "Theme", options: themes, value: theme_id, focused: is("theme"), on_focus: focus_on("theme"),
                 on_change: move |o: ListItem| { let next = if o.id == "system" { Theme::system() } else { Theme::opencode() }; status.report(&format!("theme: {}", o.label)); let mut t = switch.theme; t.set(next); })
-            View(height: 1)
-            Label(content: "Input", variant: LabelVariant::Heading)
+            }
+            }
+            Section(title: "Input".to_string()) {
+            Form {
             Toggle(label: "Mouse", value: mouse.enabled.get(), focused: is("mouse"), on_focus: focus_on("mouse"),
                 on_change: move |v: bool| { let mut enabled = mouse.enabled; enabled.set(v); status.report(if v { "mouse: on" } else { "mouse: off" }); })
             Toggle(label: "Vim keys", value: vim.get(), focused: is("vim"), on_focus: focus_on("vim"),
                 on_change: move |v: bool| { let mut vim = vim; vim.set(v); status.report(if v { "vim keys: on" } else { "vim keys: off" }); })
-            View(height: 1)
-            Label(content: "Window", variant: LabelVariant::Heading)
+            }
+            }
+            Section(title: "Window".to_string()) {
+            Form {
             TextField(label: "Minimum size", value: min_size.read().clone(), focused: is("minsize"), on_focus: focus_on("minsize"), on_change: move |v: String| { let mut min_size = min_size; min_size.set(v) })
-            View(height: 1)
+            }
+            }
             Label(content: "Theme and mouse are live; the other values are only reported. With the mouse on, shift+drag selects text in most terminals; `m` toggles it anywhere.", variant: LabelVariant::Muted)
         }
     }

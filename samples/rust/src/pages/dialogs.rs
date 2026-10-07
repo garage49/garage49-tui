@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use garage49_tui_iocraft::{Binding, ConfirmDialog, List, ListItem, MainFocus, MessageDialog, OverlayHandle, OverlayVariant, Palette, Selection, UseKeys, UseStatus};
+use garage49_tui_iocraft::{Binding, ConfirmDialog, List, ListItem, MainFocus, MessageDialog, OverlayHandle, OverlayVariant, Palette, Selection, UseKeys, UseStatus, Section};
 use iocraft::prelude::*;
 
 fn items() -> Vec<ListItem> {
@@ -46,8 +46,10 @@ pub fn DialogsPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let click = move |item: ListItem| { let mut selected = selected; selected.set(Some(item.id.clone())); open(item); };
     let wheel = move |item: ListItem| { let mut selected = selected; selected.set(Some(item.id)); };
     element! {
+        Section(title: "Open one".to_string()) {
         View(flex_direction: FlexDirection::Column, width: 50) {
             List(items: all, selected_id: current, focused: focused, on_click: click, on_select: wheel)
+        }
         }
     }
 }

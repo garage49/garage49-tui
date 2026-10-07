@@ -10,8 +10,8 @@ export class TreeClick {
     return onMarker || alreadySelected ? 'toggle' : 'select';
   }
 
-  /** Whether column `x` of a row at `depth` is the marker cell (after the row padding and the indent). */
+  /** Whether column `x` of a row at `depth` is the marker cell (after the indent). */
   static isMarker(x: number, depth: number): boolean {
-    return x === 1 + depth * 2;
+    return x === depth * 2;
   }
 }

@@ -21,7 +21,7 @@ pub fn MessageDialog(props: &mut MessageDialogProps, mut hooks: Hooks) -> impl I
     hooks.use_keys(true, vec![Binding::new(&["esc", "enter"], close.clone())], None);
     element! {
         Overlay(title: props.title.clone(), width: 50u16, variant: props.variant) {
-            View(padding_left: 1, padding_right: 1) { Label(content: props.message.clone()) }
+            View { Label(content: props.message.clone()) }
             View(height: 1)
             View(flex_direction: FlexDirection::Row, justify_content: JustifyContent::End) {
                 Button(label: "OK", selected: true, on_press: move |_| close())

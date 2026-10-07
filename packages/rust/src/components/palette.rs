@@ -75,7 +75,7 @@ pub fn Palette(props: &mut PaletteProps, mut hooks: Hooks) -> impl Into<AnyEleme
     let shown = query.read().clone();
     element! {
         Overlay(title: props.title.clone()) {
-            View(padding_left: 1, padding_right: 1) {
+            View {
                 Text(content: format!("{}{}", if shown.is_empty() { "Search".to_string() } else { shown.clone() }, Glyphs::CURSOR), color: if shown.is_empty() { t.text_muted } else { t.text })
             }
             View(height: 1)

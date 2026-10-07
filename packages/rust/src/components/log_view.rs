@@ -1,5 +1,6 @@
 use iocraft::prelude::*;
 
+use super::truncate::Truncate;
 use super::scrollbar::Scrollbar;
 use crate::input::{MouseLayer, UseMouse};
 use crate::theme::Theme;
@@ -74,7 +75,7 @@ pub fn LogView(props: &mut LogViewProps, mut hooks: Hooks) -> impl Into<AnyEleme
                     View(key: index, flex_direction: FlexDirection::Row) {
                         View(width: 9, flex_shrink: 0.0_f32) { Text(content: entry.time.clone(), color: t.text_muted) }
                         View(width: 6, flex_shrink: 0.0_f32) { Text(content: entry.level.label(), weight: Weight::Bold, color: level_color(entry.level)) }
-                        Text(content: entry.message.clone(), color: if entry.level == LogLevel::Error { t.error } else { t.text }, wrap: TextWrap::NoWrap)
+                        Truncate(content: entry.message.clone(), color: if entry.level == LogLevel::Error { t.error } else { t.text })
                     }
                 }))
             }

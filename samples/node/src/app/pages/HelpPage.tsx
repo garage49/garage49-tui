@@ -1,6 +1,6 @@
 import {Box} from 'ink';
 import type {PageProps} from './Page.js';
-import {Label, TextWidth} from '@garage49/garage49-tui-ink';
+import {Label, TextWidth, Section} from '@garage49/garage49-tui-ink';
 
 export type HelpEntry = {readonly keys: string; readonly action: string};
 
@@ -11,7 +11,7 @@ export function HelpPage({entries}: Props) {
   const keyWidth = TextWidth.widest(entries.map(entry => entry.keys)) + 2;
   return (
     <Box flexDirection="column">
-      <Label variant="heading">Keys (this app)</Label>
+      <Section title="Keys (this app)">
       <Label variant="muted">The shell's own keys are under ? · tab cycles, enter/esc go down/up, ctrl+p palette, t theme, m mouse, q quit.</Label>
       <Box height={1} />
       {entries.map(entry => (
@@ -20,9 +20,10 @@ export function HelpPage({entries}: Props) {
           <Label variant="muted">{entry.action}</Label>
         </Box>
       ))}
-      <Box height={1} />
-      <Label variant="heading">Color roles</Label>
+      </Section>
+      <Section title="Color roles">
       <Label variant="muted">accent (orange) = the cursor: one per focused region · accentSecondary (blue) = the focused region's bar, shown only where the keys go · success/warning/error = state values</Label>
+      </Section>
     </Box>
   );
 }

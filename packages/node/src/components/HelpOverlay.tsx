@@ -15,7 +15,7 @@ export function HelpOverlay({entries, onClose}: Props) {
   const keyWidth = TextWidth.widest(entries.map(entry => entry.keys)) + 2;
   return (
     <Overlay title="Help">
-      <Box flexDirection="column" paddingX={1}>
+      <Box flexDirection="column">
         {entries.map(entry => (
           <Box key={entry.keys} flexDirection="row">
             <Box width={keyWidth} flexShrink={0}><Text color={theme.tokens.text}>{entry.keys}</Text></Box>
