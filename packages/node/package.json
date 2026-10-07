@@ -11,13 +11,15 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "complexity": "eslint .",
     "test": "vitest run",
-    "check": "npm run typecheck && npm run complexity && npm test"
+    "check": "pnpm run typecheck && pnpm run complexity && pnpm run test"
   },
   "peerDependencies": {
     "ink": "^8.0.0",

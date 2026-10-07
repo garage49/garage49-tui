@@ -7,7 +7,7 @@
     "typecheck": "tsc --noEmit",
     "complexity": "eslint .",
     "test": "vitest run --passWithNoTests",
-    "check": "npm run typecheck && npm run complexity && npm test"
+    "check": "pnpm run typecheck && pnpm run complexity && pnpm run test"
   },
   "dependencies": {
     "@garage49/garage49-tui-ink": "workspace:*",
