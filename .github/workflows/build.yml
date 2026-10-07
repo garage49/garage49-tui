@@ -21,4 +21,5 @@ jobs:
       package: garage49-tui-iocraft
       targets: '[]'
       clippy: true
+      crates: '["garage49-tui-iocraft"]'
       version-files: package.json samples/rust/Cargo.toml
