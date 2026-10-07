@@ -16,6 +16,29 @@ export type TreeRow = {readonly node: TreeNode; readonly depth: number; readonly
 
 /** Flattens a tree into the rows that are visible given the expanded set. */
 export class TreeLayout {
+  /** Whether `id` is `ancestorId` itself or lies anywhere under it. */
+  static contains(nodes: readonly TreeNode[], ancestorId: string, id: string): boolean {
+    const find = (list: readonly TreeNode[]): TreeNode | undefined => {
+      for (const node of list) {
+        if (node.id === ancestorId) return node;
+        const inner = node.children ? find(node.children) : undefined;
+        if (inner) return inner;
+      }
+      return undefined;
+    };
+    const has = (node: TreeNode): boolean => node.id === id || (node.children ?? []).some(has);
+    const ancestor = find(nodes);
+    return ancestor !== undefined && has(ancestor);
+  }
+
+  /**
+   * The cursor after `branchId` collapses: a cursor inside the branch would vanish, so it moves to
+   * the branch; any other cursor stays.
+   */
+  static cursorAfterCollapse(nodes: readonly TreeNode[], branchId: string, cursorId: string | undefined): string | undefined {
+    return cursorId !== undefined && TreeLayout.contains(nodes, branchId, cursorId) ? branchId : cursorId;
+  }
+
   static rows(nodes: readonly TreeNode[], expanded: ReadonlySet<string>, depth = 0, parentId?: string): TreeRow[] {
     return nodes.flatMap(node => {
       const open = expanded.has(node.id);

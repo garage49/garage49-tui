@@ -56,6 +56,26 @@ impl TreeClick {
 pub struct TreeLayout;
 
 impl TreeLayout {
+    /// Whether `id` is `ancestor_id` itself or lies anywhere under it.
+    pub fn contains(nodes: &[TreeNode], ancestor_id: &str, id: &str) -> bool {
+        fn find<'a>(list: &'a [TreeNode], id: &str) -> Option<&'a TreeNode> {
+            list.iter().find_map(|node| if node.id == id { Some(node) } else { node.children.as_deref().and_then(|c| find(c, id)) })
+        }
+        fn has(node: &TreeNode, id: &str) -> bool {
+            node.id == id || node.children.as_deref().is_some_and(|c| c.iter().any(|n| has(n, id)))
+        }
+        find(nodes, ancestor_id).is_some_and(|ancestor| has(ancestor, id))
+    }
+
+    /// The cursor after `branch_id` collapses: a cursor inside the branch would vanish, so it moves to
+    /// the branch; any other cursor stays.
+    pub fn cursor_after_collapse(nodes: &[TreeNode], branch_id: &str, cursor_id: Option<&str>) -> Option<String> {
+        match cursor_id {
+            Some(cursor) if Self::contains(nodes, branch_id, cursor) => Some(branch_id.to_string()),
+            other => other.map(|s| s.to_string()),
+        }
+    }
+
     pub fn rows(nodes: &[TreeNode], expanded: &HashSet<String>) -> Vec<TreeRow> {
         let mut rows = Vec::new();
         Self::collect(nodes, expanded, 0, None, &mut rows);
@@ -159,6 +179,17 @@ mod tests {
         assert_eq!(ids, vec![("a", 0, None), ("a1", 1, Some("a")), ("a2", 1, Some("a")), ("b", 0, None)]);
         let hidden = TreeLayout::rows(&nodes, &HashSet::from(["a2".to_string()]));
         assert_eq!(hidden.iter().map(|r| r.node.id.as_str()).collect::<Vec<_>>(), vec!["a", "b"]);
+    }
+
+    #[test]
+    fn a_cursor_inside_a_collapsing_branch_moves_to_the_branch() {
+        let nodes = vec![
+            TreeNode::branch("a", "a", vec![TreeNode::leaf("a1", "a1"), TreeNode::branch("a2", "a2", vec![TreeNode::leaf("a2x", "a2x")])]),
+            TreeNode::leaf("b", "b"),
+        ];
+        assert_eq!(TreeLayout::cursor_after_collapse(&nodes, "a", Some("a2x")).as_deref(), Some("a"));
+        assert_eq!(TreeLayout::cursor_after_collapse(&nodes, "a", Some("b")).as_deref(), Some("b"));
+        assert_eq!(TreeLayout::cursor_after_collapse(&nodes, "a2", Some("a1")).as_deref(), Some("a1"));
     }
 
     #[test]

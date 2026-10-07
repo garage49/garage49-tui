@@ -35,6 +35,12 @@ pub fn TreePage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
         if will_open { list.push(row.node.id.clone()); }
         let mut expanded = expanded;
         expanded.set(list);
+        // A cursor inside a collapsing branch would vanish: it moves to the branch.
+        if !will_open {
+            let cursor = selected.read().clone();
+            let mut selected = selected;
+            selected.set(TreeLayout::cursor_after_collapse(&nodes(), &row.node.id, cursor.as_deref()));
+        }
     };
     let move_to = { let rows = rows.clone(); move |delta: i32| { let i = (index.unwrap_or(0) as i32 + delta).clamp(0, rows.len() as i32 - 1) as usize; let mut selected = selected; selected.set(Some(rows[i].node.id.clone())); } };
     let up = { let move_to = move_to.clone(); move || move_to(-1) };
@@ -43,7 +49,7 @@ pub fn TreePage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let collapse = { let current = current.clone(); move || { if let Some(row) = &current { if row.expanded { toggle(row, Some(false)) } else if let Some(parent) = &row.parent_id { let mut selected = selected; selected.set(Some(parent.clone())); } } } };
     let enter = { let current = current.clone(); move || { if let Some(row) = &current { toggle(row, None) } } };
     hooks.use_keys(focused, vec![Binding::new(&["up", "k"], up), Binding::new(&["down", "j"], down), Binding::new(&["right", "l"], expand), Binding::new(&["left", "h"], collapse), Binding::new(&["enter", "space"], enter)], None);
-    let on_toggle = move |row: TreeRow| { let mut selected = selected; selected.set(Some(row.node.id.clone())); toggle(&row, None); };
+    let on_toggle = move |row: TreeRow| toggle(&row, None);
     let on_select = move |row: TreeRow| { let mut selected = selected; selected.set(Some(row.node.id)); };
     element! {
         View(flex_direction: FlexDirection::Column, width: 50) {

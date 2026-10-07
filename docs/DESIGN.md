@@ -99,7 +99,7 @@ Every overlay goes through the Screen's single slot: confirm dialog, message dia
 | Label | text in one role (default, muted, bright, heading, accent, success, warning, error) | — |
 | List | rows under bold violet section headings; shortcut (muted) or value (text) right-aligned; cursor row filled | click selects, wheel moves |
 | Table | fixed-width columns, muted bold header, right-aligned numbers, cursor row filled | same as List |
-| TreeView | indented rows with ▸/▾ | ↑↓ move, → expand or step in, ← collapse or go to parent, enter/space toggle; click selects, click on the marker or on the selected row toggles |
+| TreeView | indented rows with ▸/▾ | ↑↓ move, → expand or step in, ← collapse or go to parent, enter/space toggle; click selects, click on the marker toggles without moving the cursor, click on the selected row toggles; collapsing a branch that holds the cursor moves the cursor to the branch |
 | LogView | time (muted) · level (DEBUG muted, INFO blue, WARN warning, ERROR error) · message; newest at the bottom; scrollbar | wheel and ↑↓ scroll, G follows |
 | Scrollbar | one column: faint track, thumb sized by the visible share | — |
 | Tabs | small: one row, active label filled · large: two rows, ▔ under the active label | ←→ hl, click |

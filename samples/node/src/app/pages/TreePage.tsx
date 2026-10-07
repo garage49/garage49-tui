@@ -37,6 +37,8 @@ export function TreePage({focused, report}: PageProps) {
     const willOpen = open ?? !next.has(row.node.id);
     if (willOpen) next.add(row.node.id); else next.delete(row.node.id);
     setExpanded(next);
+    // A cursor inside a collapsing branch would vanish: it moves to the branch.
+    if (!willOpen) setSelectedId(TreeLayout.cursorAfterCollapse(nodes, row.node.id, selectedId));
   };
   const move = (delta: number) => {
     const next = rows[Math.min(rows.length - 1, Math.max(0, index + delta))];
@@ -67,7 +69,7 @@ export function TreePage({focused, report}: PageProps) {
         selectedId={selectedId}
         focused={focused}
         onSelect={row => setSelectedId(row.node.id)}
-        onToggle={row => { setSelectedId(row.node.id); toggle(row); }}
+        onToggle={row => toggle(row)}
       />
     </Box>
   );

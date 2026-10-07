@@ -18,3 +18,12 @@ describe('TreeLayout', () => {
     expect(TreeLayout.rows(nodes, new Set(['a2'])).map(row => row.node.id)).toEqual(['a', 'b']);
   });
 });
+
+describe('TreeLayout.cursorAfterCollapse', () => {
+  it('moves a cursor that would vanish to the collapsing branch and leaves others alone', () => {
+    expect(TreeLayout.cursorAfterCollapse(nodes, 'a', 'a2x')).toBe('a');
+    expect(TreeLayout.cursorAfterCollapse(nodes, 'a', 'a')).toBe('a');
+    expect(TreeLayout.cursorAfterCollapse(nodes, 'a', 'b')).toBe('b');
+    expect(TreeLayout.cursorAfterCollapse(nodes, 'a2', 'a1')).toBe('a1');
+  });
+});
