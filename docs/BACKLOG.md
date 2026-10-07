@@ -25,3 +25,5 @@ up in both the herdr-connect and the herdr-ranch conversions.
 | 17 | Tree-shaped sidebar (collapsible sections) | herdr-ranch | open |
 | 18 | `.trm`/DESIGN.md: the ambiguous-width ban conflicts with projects that spelled `••••`; document `****` as the masked value | herdr-ranch | done: TextField `secret` shows `*` |
 | 19 | A text field unmounted while editing left the app in typing mode (Rust: no unmount hook) | adoc-hub | done: typing is keyed to the App's frame |
+| 20 | `ListItem.value` with a tone (success / warning / error) for state values in a list row; the color roles already name them | herdr-ranch (bd61cf6 draws the state as a Label under the List) | open |
+| 21 | Read-only scrollable text block (a file or long text with a Scrollbar, no editing) | herdr-ranch (settings file shown with a local Lines of Label + Scrollbar) | open |
