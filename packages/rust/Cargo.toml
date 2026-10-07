@@ -1,6 +1,6 @@
 [package]
 name = "garage49-tui-iocraft"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 description = "garage49 TUI design system for Rust: OpenCode's look and feel as iocraft components"
 license = "MIT"

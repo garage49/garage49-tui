@@ -1,6 +1,6 @@
 {
   "name": "@garage49/garage49-tui-ink",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "garage49 TUI design system for Node.js: OpenCode's look and feel as Ink components",
   "license": "MIT",
   "repository": "github:garage49/garage49-tui",

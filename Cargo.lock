@@ -395,7 +395,7 @@ dependencies = [
 
 [[package]]
 name = "garage49-tui-gallery"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "garage49-tui-iocraft",
  "iocraft",
@@ -404,7 +404,7 @@ dependencies = [
 
 [[package]]
 name = "garage49-tui-iocraft"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "iocraft",
  "smol",
