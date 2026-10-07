@@ -7,3 +7,4 @@ export {useFocused} from './FocusRegistry.js';
 export {useStatus} from './Status.js';
 export {useTyping, useTypingState} from './Typing.js';
 export {run} from './run.js';
+export {ScreenFit, type Fit} from './Fit.js';

@@ -3,10 +3,12 @@ import type {ReactNode} from 'react';
 import type {HelpEntry} from '../components/HelpOverlay.js';
 import type {KeyHint} from '../components/KeyHintBar.js';
 import {Screen, useOverlay} from '../components/Screen.js';
+import {useWindowSize} from 'ink';
 import type {StatusSegment} from '../components/StatusLine.js';
 import {useKeys, type Binding} from '../input/Keys.js';
 import {useAppActions, type Command} from './AppActions.js';
 import {BottomBars} from './BottomBars.js';
+import {ScreenFit} from './Fit.js';
 import {FocusProvider, useFocusState} from './FocusRegistry.js';
 import {StatusProvider} from './Status.js';
 import {TypingProvider, useTypingState} from './Typing.js';
@@ -27,6 +29,9 @@ type Props = {
   context?: string;
   /** The quit confirmation's message. */
   quitMessage?: string;
+  /** Show a notice instead of the app below this size; off by default (the App degrades instead). */
+  minColumns?: number;
+  minRows?: number;
 };
 
 /**
@@ -36,7 +41,7 @@ type Props = {
  */
 export function App(props: Props) {
   return (
-    <Screen>
+    <Screen minColumns={props.minColumns} minRows={props.minRows}>
       <FocusProvider>
         <StatusProvider>
           <TypingProvider>
@@ -51,6 +56,8 @@ export function App(props: Props) {
 function Frame({children, commands = [], help = [], hints = [], status = [], context = '', quitMessage = 'Quit?'}: Props) {
   const overlay = useOverlay();
   const {registry, focusedId, setFocusedId} = useFocusState();
+  const {columns, rows} = useWindowSize();
+  const fit = ScreenFit.decide(columns, rows, false);
   const {typing} = useTypingState();
   const actions = useAppActions(commands, help, quitMessage);
   const move = (delta: number, wrap = false) => setFocusedId(registry.neighbour(focusedId, delta, wrap)?.id);
@@ -71,8 +78,8 @@ function Frame({children, commands = [], help = [], hints = [], status = [], con
   ], {isActive: !overlay.isOpen});
   return (
     <>
-      <Box flexDirection="column" flexGrow={1}>{children}</Box>
-      <BottomBars actions={actions} hints={hints} status={status} context={context} onNext={() => move(1, true)} />
+      <Box flexDirection="column" flexGrow={1} flexShrink={1} minHeight={0} overflow="hidden">{children}</Box>
+      <BottomBars actions={actions} hints={hints} status={status} context={context} onNext={() => move(1, true)} showStatusLine={fit.statusLine} showKeyHints={fit.keyHints} />
     </>
   );
 }

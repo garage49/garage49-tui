@@ -56,4 +56,4 @@ cargo run -p garage49-tui-gallery    # Rust gallery
 
 Releases: bump `version` in the root `package.json`, `packages/node/package.json` and `packages/rust/Cargo.toml` in one commit on `main`, then tag it `vX.Y.Z`; the garage49 build farm publishes to npm and crates.io from the tag.
 
-Both galleries need a terminal of at least 80×24; truecolor selects the OpenCode theme, otherwise the system theme is used. `G49_THEME=system` forces the fallback.
+The galleries render at any terminal size (narrow: sidebar only; short: without the bottom bars); truecolor selects the OpenCode theme, otherwise the system theme is used. `G49_THEME=system` forces the fallback.

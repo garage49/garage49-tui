@@ -37,6 +37,9 @@ pub struct AppProps<'a> {
     pub context: String,
     /// The quit confirmation's message.
     pub quit_message: Option<String>,
+    /// Show a notice instead of the app below this size; off by default (the App degrades instead).
+    pub min_columns: Option<u16>,
+    pub min_rows: Option<u16>,
 }
 
 /// The application frame: the screen, theme, mouse, overlay slot, focus cycling and the two bottom
@@ -53,7 +56,7 @@ pub fn App<'a>(props: &mut AppProps<'a>, mut hooks: Hooks) -> impl Into<AnyEleme
     let status = StatusState { last_action };
     let typing = TypingState { editing };
     element! {
-        Screen {
+        Screen(min_columns: props.min_columns, min_rows: props.min_rows) {
             ContextProvider(value: Context::owned(focus.clone())) {
                 ContextProvider(value: Context::owned(status)) {
                     ContextProvider(value: Context::owned(typing)) {
@@ -199,6 +202,7 @@ fn Frame<'a>(props: &mut FrameProps<'a>, mut hooks: Hooks) -> impl Into<AnyEleme
     hooks.use_keys(!overlay.is_open(), bindings, None);
 
     let (columns, rows) = hooks.use_terminal_size();
+    let fit = super::fit::ScreenFit::decide(columns, rows, false);
     let clock = chrono_free_clock();
     let last = status.last_action.read().clone();
     let mut left = vec![StatusSegment::new(&format!("{} {}", Glyphs::ON, last), StatusTone::Success)];
@@ -223,14 +227,16 @@ fn Frame<'a>(props: &mut FrameProps<'a>, mut hooks: Hooks) -> impl Into<AnyEleme
         }
     };
     element! {
-        View(flex_direction: FlexDirection::Column, flex_grow: 1.0_f32) {
-            View(flex_direction: FlexDirection::Column, flex_grow: 1.0_f32) {
+        View(flex_direction: FlexDirection::Column, flex_grow: 1.0_f32, flex_shrink: 1.0_f32, min_height: 0, overflow: Overflow::Hidden) {
+            View(flex_direction: FlexDirection::Column, flex_grow: 1.0_f32, flex_shrink: 1.0_f32, min_height: 0, overflow: Overflow::Hidden) {
                 #(props.children.iter_mut())
             }
-            StatusLine(left: left, right: right)
-            View(padding_left: 2, padding_right: 2) {
-                KeyHintBar(left: props.context.clone(), hints: hints, on_press: on_hint)
-            }
+            #(if fit.status_line { Some(element! { StatusLine(left: left, right: right) }) } else { None })
+            #(if fit.key_hints { Some(element! {
+                View(padding_left: 2, padding_right: 2) {
+                    KeyHintBar(left: props.context.clone(), hints: hints, on_press: on_hint)
+                }
+            }) } else { None })
         }
     }
 }

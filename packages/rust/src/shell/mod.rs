@@ -1,5 +1,6 @@
 mod app;
 mod content;
+mod fit;
 mod focus;
 mod main_region;
 mod nav;
@@ -10,6 +11,7 @@ mod typing;
 
 pub use app::{App, AppProps, Command};
 pub use content::{Content, ContentProps};
+pub use fit::{Fit, ScreenFit};
 pub use focus::{FocusRegistry, FocusState, RegionId, UseFocusRegion};
 pub(crate) use focus::focus_next_field_id;
 pub use main_region::{Main, MainFocus, MainProps};

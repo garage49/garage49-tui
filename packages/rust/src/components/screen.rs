@@ -97,8 +97,9 @@ pub fn Screen<'a>(props: &mut ScreenProps<'a>, mut hooks: Hooks) -> impl Into<An
     system.set_mouse_capture(enabled.get());
     drop(system);
 
-    let min_columns = props.min_columns.unwrap_or(80);
-    let min_rows = props.min_rows.unwrap_or(24);
+    // No size gate by default: the App degrades (see shell::ScreenFit). An app may still ask for a notice.
+    let min_columns = props.min_columns.unwrap_or(0);
+    let min_rows = props.min_rows.unwrap_or(0);
     let handle = OverlayHandle { shown };
     let mouse = MouseState { enabled, overlay_open };
 
@@ -118,7 +119,7 @@ pub fn Screen<'a>(props: &mut ScreenProps<'a>, mut hooks: Hooks) -> impl Into<An
         }
     });
 
-    if columns < min_columns || rows < min_rows {
+    if (min_columns > 0 || min_rows > 0) && (columns < min_columns || rows < min_rows) {
         return element! {
             View(width: columns, height: rows, background_color: theme.tokens.background, align_items: AlignItems::Center, justify_content: JustifyContent::Center) {
                 Text(content: format!("Terminal too small: {columns}×{rows}, need {min_columns}×{min_rows}"), color: theme.tokens.text_muted)
@@ -133,7 +134,7 @@ pub fn Screen<'a>(props: &mut ScreenProps<'a>, mut hooks: Hooks) -> impl Into<An
             ContextProvider(value: Context::owned(mouse)) {
                 View(width: columns, height: rows, background_color: below.tokens.background, flex_direction: FlexDirection::Column) {
                     ContextProvider(value: Context::owned(below.clone())) {
-                        View(flex_direction: FlexDirection::Column, flex_grow: 1.0_f32) {
+                        View(flex_direction: FlexDirection::Column, flex_grow: 1.0_f32, flex_shrink: 1.0_f32, min_height: 0, overflow: Overflow::Hidden) {
                             #(props.children.iter_mut())
                         }
                     }

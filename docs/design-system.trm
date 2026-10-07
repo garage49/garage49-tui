@@ -200,7 +200,8 @@ concept _App_Frame_ = {
   - An _App_Frame_ must contain a _Navigation_Header_, a _Sidebar_, or both, and always a _Main_Page_.
   - An _App_Frame_ must render the three agreed layouts from the tree alone: a header only, a sidebar only, or both.
   - An _App_Frame_ must show the quit confirmation on q, the help on ?, and the command palette on ctrl+p, and must add Toggle theme, Toggle mouse, Keyboard shortcuts and Quit to the palette.
-  - An _App_Frame_ must show a notice instead of the layout while the terminal is smaller than 80 by 24 cells.
+  - An _App_Frame_ must render at any terminal size and degrade instead of refusing: below 64 columns a layout with a _Sidebar_ keeps the _Sidebar_ alone, below 12 rows the _Key_Hint_Bar_ is dropped, below 8 rows the _Status_Line_ too.
+  - An _App_Frame_ may show a notice instead of the layout below a minimum size only when the application sets one; no minimum is set by default.
 }
 
 concept _Navigation_Header_ = {
@@ -482,7 +483,7 @@ concept _Library_ = {
 .contract
   - A _Library_ must render the same screen as every other _Library_ for the same tree, checked in a 110 by 32 cell terminal.
   - A _Library_ must restore the terminal on exit, on panic and on ctrl+c: raw mode, the alternate screen, the cursor and _Mouse_Reporting_.
-  - A _Library_ must handle resize and must draw CJK and emoji at their display width without broken wrapping or truncation.
+  - A _Library_ must handle resize at any size and must draw CJK and emoji at their display width without broken wrapping or truncation.
   - A _Library_ must work under SSH, tmux and Herdr.
 .remarks
   Chosen: the Ink and iocraft libraries were chosen over OpenTUI and ratatui because both are component models with hooks and flexbox layout, so one design system maps onto both.

@@ -63,3 +63,4 @@ export {useFocused} from './shell/FocusRegistry.js';
 export {useStatus} from './shell/Status.js';
 export {useTyping, useTypingState} from './shell/Typing.js';
 export {run, TerminalTheme} from './shell/run.js';
+export {ScreenFit, type Fit} from './shell/Fit.js';

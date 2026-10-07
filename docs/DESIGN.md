@@ -121,7 +121,7 @@ Every overlay goes through the Screen's single slot: confirm dialog, message dia
 ## Quality bar
 
 - Terminal restored on exit, panic and ctrl+c (raw mode, alternate screen, cursor, mouse reporting).
-- Resize handled; below 80×24 the screen shows a notice instead of a broken layout.
+- Resize handled at any size. The App never refuses to draw: below 64 columns a layout with a sidebar keeps the sidebar alone (the navigation stays readable while another pane owns the rest), below 12 rows the key hint bar is dropped, below 8 rows the status line too. An app may set a minimum size to show a notice instead; none is set by default.
 - Works under SSH, tmux and Herdr.
 - Correct CJK and emoji width: no broken wrapping or truncation.
 - Both galleries render the same screen in a 110×32 tmux pane; the comparison is part of accepting a change.

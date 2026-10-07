@@ -24,7 +24,7 @@ export function StatusLine({left, right = []}: Props) {
       </Box>
     ));
   return (
-    <Box flexDirection="row" height={1} width="100%" backgroundColor={theme.tokens.panel} paddingX={2}>
+    <Box flexDirection="row" height={1} flexShrink={0} width="100%" backgroundColor={theme.tokens.panel} paddingX={2}>
       <Box flexDirection="row" flexGrow={1} flexBasis={0} overflow="hidden">{render(left)}</Box>
       <Box flexDirection="row" flexShrink={0}>{render(right)}</Box>
     </Box>

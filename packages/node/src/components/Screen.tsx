@@ -23,6 +23,7 @@ export function useOverlay(): OverlayHandle {
   return useContext(OverlayContext);
 }
 
+/** minColumns/minRows: show a notice instead of the app below this size. Off (0) by default: the App degrades instead. */
 type Props = {children: ReactNode; minColumns?: number; minRows?: number};
 
 type Shown = {element: ReactNode; options: OverlayOptions};
@@ -36,7 +37,7 @@ export function Screen(props: Props) {
   );
 }
 
-function ScreenBody({children, minColumns = 80, minRows = 24}: Props) {
+function ScreenBody({children, minColumns = 0, minRows = 0}: Props) {
   const {columns, rows} = useWindowSize();
   const theme = useTheme();
   const [shown, setShown] = useState<Shown | null>(null);
@@ -50,7 +51,7 @@ function ScreenBody({children, minColumns = 80, minRows = 24}: Props) {
     <OverlayContext.Provider value={handle}>
       <Box width={columns} height={rows} backgroundColor={below.tokens.background} flexDirection="column">
         <ThemeProvider theme={below}>
-          <Box flexDirection="column" flexGrow={1}>{children}</Box>
+          <Box flexDirection="column" flexGrow={1} flexShrink={1} minHeight={0} overflow="hidden">{children}</Box>
         </ThemeProvider>
         {shown && <OverlayLayer shown={shown} columns={columns} rows={rows} onBackdrop={() => setShown(null)} />}
       </Box>

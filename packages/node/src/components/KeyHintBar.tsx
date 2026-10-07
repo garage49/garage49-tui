@@ -23,7 +23,7 @@ export function KeyHintBar({hints, left = '', onPress}: Props) {
     },
   });
   return (
-    <Box flexDirection="row" height={1} width="100%">
+    <Box flexDirection="row" height={1} flexShrink={0} width="100%">
       <Box flexGrow={1} flexBasis={0} overflow="hidden"><Text color={theme.tokens.textMuted} wrap="truncate-middle">{left}</Text></Box>
       <Box ref={pairs} flexShrink={0} flexDirection="row">
         {hints.map(hint => (

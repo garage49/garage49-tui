@@ -28,13 +28,13 @@ export function TopNav({brand, items, activeId, focused = false, onChange, right
   useMouseTarget(box, {onPress: () => {}});
   /** A two-row cell of a fixed width, or growing to fill: content on the surface row, nothing below. */
   const cell = (content: ReactNode, width: number | 'grow') => (
-    <Box flexDirection="column" width={width === 'grow' ? undefined : width} flexGrow={width === 'grow' ? 1 : 0} flexBasis={width === 'grow' ? 0 : undefined} overflow="hidden">
+    <Box flexDirection="column" width={width === 'grow' ? undefined : width} flexGrow={width === 'grow' ? 1 : 0} flexShrink={width === 'grow' ? 1 : 0} flexBasis={width === 'grow' ? 0 : undefined} overflow="hidden">
       <Box height={1} backgroundColor={theme.tokens.surface}>{content}</Box>
       <Box height={1} />
     </Box>
   );
   return (
-    <Box ref={box} flexDirection="row" height={2} width="100%">
+    <Box ref={box} flexDirection="row" height={2} flexShrink={0} width="100%" overflow="hidden">
       {cell(<Box paddingX={2} backgroundColor={theme.tokens.heading}><Text bold color={theme.tokens.background}>{brand}</Text></Box>, TextWidth.of(brand) + 4)}
       {cell(null, 3)}
       <Tabs tabs={items} activeId={activeId} focused={focused} size="large" labelSurface={theme.tokens.surface} onChange={onChange} />

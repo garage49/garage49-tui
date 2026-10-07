@@ -15,12 +15,14 @@ type Props = {
   context: string;
   /** Tab's hint: moves the focus to the next region. */
   onNext: () => void;
+  showStatusLine?: boolean;
+  showKeyHints?: boolean;
 };
 
 const builtinHints: readonly KeyHint[] = [{key: 'tab', label: 'focus'}, {key: 'ctrl+p', label: 'commands'}, {key: '?', label: 'help'}, {key: 'q', label: 'quit'}];
 
 /** The status line (last action, app segments, mouse, theme, size, clock) and the key hint bar. */
-export function BottomBars({actions, hints, status, context, onNext}: Props) {
+export function BottomBars({actions, hints, status, context, onNext, showStatusLine = true, showKeyHints = true}: Props) {
   const theme = useTheme();
   const mouse = useMouseSwitch();
   const {columns, rows} = useWindowSize();
@@ -36,7 +38,7 @@ export function BottomBars({actions, hints, status, context, onNext}: Props) {
   };
   return (
     <>
-      <StatusLine
+      {showStatusLine && <StatusLine
         left={[{id: 'app.state', text: `${Glyphs.on} ${lastAction}`, tone: 'success'}, ...status]}
         right={[
           {id: 'app.mouse', text: mouse.enabled ? 'mouse' : 'no mouse', tone: mouse.enabled ? 'muted' : 'warning'},
@@ -44,10 +46,12 @@ export function BottomBars({actions, hints, status, context, onNext}: Props) {
           {id: 'app.size', text: `${columns}×${rows}`, tone: 'muted'},
           {id: 'app.clock', text: clock},
         ]}
-      />
-      <Box paddingX={2}>
-        <KeyHintBar left={context} hints={[...hints, ...builtinHints]} onPress={onHint} />
-      </Box>
+      />}
+      {showKeyHints && (
+        <Box paddingX={2} flexShrink={0}>
+          <KeyHintBar left={context} hints={[...hints, ...builtinHints]} onPress={onHint} />
+        </Box>
+      )}
     </>
   );
 }

@@ -44,7 +44,7 @@ export function Tabs({tabs, activeId, focused = true, size = 'small', labelSurfa
           const highlighted = active && focused;
           const fill = active ? (focused ? theme.tokens.selectionBackground : theme.tokens.surfaceRaised) : undefined;
           return (
-            <Box key={tab.id} paddingX={2} backgroundColor={fill}>
+            <Box key={tab.id} paddingX={2} flexShrink={0} backgroundColor={fill}>
               <Text bold={active} color={highlighted ? theme.tokens.selectionText : active ? theme.tokens.textBright : theme.tokens.textMuted}>{tab.label}</Text>
             </Box>
           );
@@ -58,7 +58,7 @@ export function Tabs({tabs, activeId, focused = true, size = 'small', labelSurfa
         const active = tab.id === activeId;
         const width = widths[index]!;
         return (
-          <Box key={tab.id} flexDirection="column" width={width}>
+          <Box key={tab.id} flexDirection="column" width={width} flexShrink={0}>
             <Box height={1} paddingX={2} backgroundColor={labelSurface}>
               <Text bold={active} color={active ? theme.tokens.textBright : theme.tokens.textMuted}>{tab.label}</Text>
             </Box>
