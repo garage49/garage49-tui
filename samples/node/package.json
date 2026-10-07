@@ -1,0 +1,27 @@
+{
+  "name": "garage49-tui-gallery",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/main.tsx",
+    "typecheck": "tsc --noEmit",
+    "complexity": "eslint .",
+    "test": "vitest run --passWithNoTests",
+    "check": "npm run typecheck && npm run complexity && npm test"
+  },
+  "dependencies": {
+    "@garage49/garage49-tui-ink": "*",
+    "ink": "^8.0.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.0.0",
+    "vitest": "^5.0.0"
+  }
+}

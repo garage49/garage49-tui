@@ -1,0 +1,10 @@
+{
+  "name": "garage49-tui",
+  "private": true,
+  "workspaces": ["packages/node", "samples/node"],
+  "scripts": {
+    "build": "npm run build --workspace packages/node",
+    "check": "npm run check --workspaces",
+    "gallery": "npm run build && npm start --workspace samples/node"
+  }
+}
