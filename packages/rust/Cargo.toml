@@ -1,0 +1,17 @@
+[package]
+name = "garage49-tui-iocraft"
+version = "0.1.0"
+edition = "2021"
+description = "garage49 TUI design system for Rust: OpenCode's look and feel as iocraft components"
+license = "MIT"
+repository = "https://github.com/garage49/garage49-tui"
+
+[dependencies]
+iocraft = "0.9"
+unicode-width = "0.1"
+smol = "2"
+
+[lints.clippy]
+cognitive_complexity = "deny"
+too_many_lines = "deny"
+too_many_arguments = "deny"

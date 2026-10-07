@@ -1,0 +1,15 @@
+[package]
+name = "garage49-tui-gallery"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+garage49-tui-iocraft = { path = "../../packages/rust" }
+iocraft = "0.9"
+smol = "2"
+
+[lints.clippy]
+cognitive_complexity = "deny"
+too_many_lines = "deny"
+too_many_arguments = "deny"

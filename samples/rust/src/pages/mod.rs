@@ -1,0 +1,27 @@
+mod dialogs;
+mod editing;
+mod form;
+mod help;
+mod home;
+mod indicators;
+mod labels;
+mod list;
+mod log;
+mod settings;
+mod table;
+mod tabs;
+mod tree;
+
+pub use dialogs::DialogsPage;
+pub use editing::EditingPage;
+pub use form::FormPage;
+pub use help::HelpPage;
+pub use home::HomePage;
+pub use indicators::IndicatorsPage;
+pub use labels::LabelsPage;
+pub use list::ListPage;
+pub use log::LogPage;
+pub use settings::SettingsPage;
+pub use table::TablePage;
+pub use tabs::TabsPage;
+pub use tree::TreePage;

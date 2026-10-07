@@ -1,0 +1,4 @@
+# The complexity gate, with the same limits as the Node package: cyclomatic 10, 50 lines, 5 parameters.
+cognitive-complexity-threshold = 10
+too-many-lines-threshold = 50
+too-many-arguments-threshold = 5
