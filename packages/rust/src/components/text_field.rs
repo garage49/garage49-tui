@@ -1,6 +1,7 @@
 use iocraft::prelude::*;
 
 use super::field_bar::FieldBar;
+use super::form::UseFormLayout;
 use crate::input::{Binding, MouseLayer, UseKeys, UseMouse};
 use crate::shell::UseTyping;
 use crate::theme::{Glyphs, Theme};
@@ -24,6 +25,7 @@ pub fn TextField(props: &mut TextFieldProps, mut hooks: Hooks) -> impl Into<AnyE
     let theme = hooks.use_context::<Theme>().clone();
     let t = theme.tokens;
     hooks.use_typing(props.focused);
+    let (label_col, _) = hooks.use_form_field(&props.label, props.label_width, None);
     let allowed = hooks.mouse_allowed(MouseLayer::Screen);
     let mut on_focus = props.on_focus.take();
     hooks.use_mouse(allowed, move |event| {
@@ -58,7 +60,7 @@ pub fn TextField(props: &mut TextFieldProps, mut hooks: Hooks) -> impl Into<AnyE
     let content = format!("{shown}{}", if focused { Glyphs::CURSOR } else { "" });
     element! {
         View(flex_direction: FlexDirection::Row, height: 1) {
-            View(width: props.label_width.unwrap_or(14), flex_shrink: 0.0_f32) { Text(content: props.label.clone(), color: if focused { t.text } else { t.text_muted }) }
+            View(width: label_col, flex_shrink: 0.0_f32) { Text(content: props.label.clone(), color: if focused { t.text } else { t.text_muted }) }
             FieldBar(focused: focused)
             View(flex_grow: 1.0_f32, background_color: t.surface, padding_left: 1, padding_right: 1) {
                 Text(content: content, color: if value.is_empty() { t.text_muted } else { t.text }, wrap: TextWrap::NoWrap)

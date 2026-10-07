@@ -4,6 +4,7 @@ import {useKeys} from '../input/Keys.js';
 import {useMouseTarget} from '../input/Mouse.js';
 import {useTheme} from '../theme/ThemeContext.js';
 import {FieldBar} from './FieldBar.js';
+import {useFieldColumns} from './Form.js';
 import {Dropdown} from './Dropdown.js';
 import type {ListItem} from './List.js';
 import {useOverlay} from './Screen.js';
@@ -20,8 +21,9 @@ type Props = {
 };
 
 /** A select box: the current option with a ▾ on a surface. Enter, space or a click opens a dropdown; ←→ cycle without opening. */
-export function Select({label, options, value, onChange, focused = false, onFocus, labelWidth = 14, width = 24}: Props) {
+export function Select({label, options, value, onChange, focused = false, onFocus, labelWidth, width}: Props) {
   const theme = useTheme();
+  const {labelCol, valueCol} = useFieldColumns(labelWidth, width);
   const overlay = useOverlay();
   const box = useRef<DOMElement>(null);
   const current = options.find(option => option.id === value);
@@ -30,6 +32,7 @@ export function Select({label, options, value, onChange, focused = false, onFocu
   const open = () => {
     if (!box.current) return;
     const rect = measureElement(box.current);
+    const labelWidth = labelCol;
     overlay.show(
       <Dropdown items={options} initialId={value} onClose={overlay.hide} onPick={option => { overlay.hide(); onChange?.(option); }} />,
       {top: rect.y + 1, left: rect.x + labelWidth},
@@ -49,9 +52,9 @@ export function Select({label, options, value, onChange, focused = false, onFocu
 
   return (
     <Box ref={box} flexDirection="row" height={1}>
-      <Box width={labelWidth} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
+      <Box width={labelCol} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
       <FieldBar focused={focused} />
-      <Box width={width} backgroundColor={theme.tokens.surface} paddingX={1} flexDirection="row">
+      <Box width={valueCol} backgroundColor={theme.tokens.surface} paddingX={1} flexDirection="row">
         <Box flexGrow={1} overflow="hidden"><Text color={theme.tokens.text} wrap="truncate-end">{current?.label ?? ''}</Text></Box>
         <Text color={focused ? theme.tokens.text : theme.tokens.textMuted}> ▾</Text>
       </Box>

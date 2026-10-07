@@ -49,6 +49,11 @@ export {Checkbox} from './components/Checkbox.js';
 export {RadioGroup} from './components/RadioGroup.js';
 export {Button} from './components/Button.js';
 
+// Layout
+export {Section} from './components/Section.js';
+export {Split} from './components/Split.js';
+export {Form, useFormLayout, useFieldColumns, MIN_LABEL_WIDTH, type FormLayout} from './components/Form.js';
+
 // Text and indicators
 export {Label, type LabelVariant} from './components/Label.js';
 export {Chip, type ChipTone} from './components/Chip.js';

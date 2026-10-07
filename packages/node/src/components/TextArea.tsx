@@ -1,10 +1,11 @@
 import {Box, Text, type DOMElement} from 'ink';
 import {useEffect, useRef, useState} from 'react';
-import {useKeys} from '../input/Keys.js';
+import {useKeys, type Binding} from '../input/Keys.js';
 import {useMouseTarget} from '../input/Mouse.js';
 import {useTyping} from '../shell/Typing.js';
 import {useTheme} from '../theme/ThemeContext.js';
 import {FieldBar} from './FieldBar.js';
+import {useFieldColumns} from './Form.js';
 import {Scrollbar} from './Scrollbar.js';
 import {TextBuffer} from './TextBuffer.js';
 
@@ -26,8 +27,9 @@ type Props = {
  * A multi-line editor on a surface: arrows move the cursor, enter splits the line, backspace joins.
  * The cursor is the inverted cell. The wheel scrolls the view; moving the cursor brings it back into view.
  */
-export function TextArea({label, buffer, onChange, placeholder = '', focused = false, onFocus, labelWidth = 14, rows = 5, onLeave}: Props) {
+export function TextArea({label, buffer, onChange, placeholder = '', focused = false, onFocus, labelWidth, rows = 5, onLeave}: Props) {
   const theme = useTheme();
+  const {labelCol} = useFieldColumns(labelWidth);
   useTyping(focused);
   const box = useRef<DOMElement>(null);
   const [scrollTop, setScrollTop] = useState(0);
@@ -50,24 +52,12 @@ export function TextArea({label, buffer, onChange, placeholder = '', focused = f
     pending.current = next;
     onChange?.(next);
   };
-  const edit = (f: (b: TextBuffer) => TextBuffer) => () => emit(f(pending.current));
-  useKeys([
-    {keys: ['up'], run: () => (pending.current.row === 0 ? onLeave?.(-1) : emit(pending.current.move(-1, 0)))},
-    {keys: ['down'], run: () => (pending.current.row === pending.current.lines.length - 1 ? onLeave?.(1) : emit(pending.current.move(1, 0)))},
-    {keys: ['left'], run: edit(b => b.move(0, -1))},
-    {keys: ['right'], run: edit(b => b.move(0, 1))},
-    {keys: ['pageup'], run: edit(b => b.move(-rows, 0))},
-    {keys: ['pagedown'], run: edit(b => b.move(rows, 0))},
-    {keys: ['home'], run: edit(b => b.home())},
-    {keys: ['end'], run: edit(b => b.end())},
-    {keys: ['enter'], run: edit(b => b.newline())},
-    {keys: ['backspace', 'delete'], run: edit(b => b.backspace())},
-  ], {isActive: focused, onText: text => emit(pending.current.insert(text))});
+  useKeys(editorBindings(() => pending.current, emit, rows, onLeave), {isActive: focused, onText: text => emit(pending.current.insert(text))});
 
   const empty = buffer.text === '' && !focused;
   return (
     <Box ref={box} flexDirection="row" height={rows}>
-      <Box width={labelWidth} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
+      <Box width={labelCol} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
       <FieldBar focused={focused} rows={rows} />
       <Box flexDirection="column" flexGrow={1} backgroundColor={theme.tokens.surface} paddingX={1}>
         {empty && <Text color={theme.tokens.textMuted}>{placeholder}</Text>}
@@ -92,4 +82,21 @@ function TextAreaLine({line, cursorCol}: {line: string | undefined; cursorCol: n
       {chars.slice(0, cursorCol).join('')}<Text inverse>{chars[cursorCol] ?? ' '}</Text>{chars.slice(cursorCol + 1).join('')}
     </Text>
   );
+}
+
+/** The editor's keys over the latest buffer; ↑ on the first line and ↓ on the last leave the field. */
+function editorBindings(current: () => TextBuffer, emit: (next: TextBuffer) => void, rows: number, onLeave?: (direction: -1 | 1) => void): Binding[] {
+  const edit = (f: (b: TextBuffer) => TextBuffer) => () => emit(f(current()));
+  return [
+    {keys: ['up'], run: () => (current().row === 0 ? onLeave?.(-1) : emit(current().move(-1, 0)))},
+    {keys: ['down'], run: () => (current().row === current().lines.length - 1 ? onLeave?.(1) : emit(current().move(1, 0)))},
+    {keys: ['left'], run: edit(b => b.move(0, -1))},
+    {keys: ['right'], run: edit(b => b.move(0, 1))},
+    {keys: ['pageup'], run: edit(b => b.move(-rows, 0))},
+    {keys: ['pagedown'], run: edit(b => b.move(rows, 0))},
+    {keys: ['home'], run: edit(b => b.home())},
+    {keys: ['end'], run: edit(b => b.end())},
+    {keys: ['enter'], run: edit(b => b.newline())},
+    {keys: ['backspace', 'delete'], run: edit(b => b.backspace())},
+  ];
 }

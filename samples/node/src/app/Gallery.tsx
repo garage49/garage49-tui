@@ -6,6 +6,7 @@ import {HelpPage} from './pages/HelpPage.js';
 import {HomePage} from './pages/HomePage.js';
 import {IndicatorsPage} from './pages/IndicatorsPage.js';
 import {LabelsPage} from './pages/LabelsPage.js';
+import {LayoutPage} from './pages/LayoutPage.js';
 import {ListPage} from './pages/ListPage.js';
 import {LogPage} from './pages/LogPage.js';
 import type {PageProps} from './pages/Page.js';
@@ -22,6 +23,7 @@ type Page = ListItem & {readonly title: string; readonly render: (props: PagePro
 const pages: readonly Page[] = [
   {id: 'home', label: 'Home', section: 'Overview', title: 'Home', render: p => <HomePage {...p} />},
   {id: 'labels', label: 'Labels & tokens', section: 'Overview', title: 'Labels and color tokens', render: p => <LabelsPage {...p} />},
+  {id: 'layout', label: 'Layout', section: 'Overview', title: 'Layout · sections, forms and splits', render: p => <LayoutPage {...p} />},
   {id: 'tabs', label: 'Tabs', section: 'Navigation', title: 'Tabs', render: p => <TabsPage {...p} />},
   {id: 'tree', label: 'Tree view', section: 'Navigation', title: 'Tree view', render: p => <TreePage {...p} />},
   {id: 'list', label: 'List', section: 'Data', title: 'List', render: p => <ListPage {...p} />},

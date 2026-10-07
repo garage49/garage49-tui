@@ -88,6 +88,18 @@ App                       screen, theme, mouse, overlay slot, focus cycling, sta
 
 Nav and Sidebar are each optional, but at least one of them must be present. The three agreed layouts are the three trees: `App > Nav + Content > Main` (top navigation only), `App > Content > Sidebar + Main` (sidebar only) and `App > Nav + Content > Sidebar + Main` (both). The status line shows `▪ last action · app segments ‖ mouse · theme · columns×rows · clock`; the key hint bar shows muted context at the left and `key label` pairs at the right (clickable).
 
+## Layout and spacing
+
+Pages are composed of three layout components and the data and field components; nothing else carries padding or widths.
+
+| Component | Rule |
+|---|---|
+| Section | a heading (violet, bold) and its body right under it; one blank row after each section |
+| Split | sub-panes side by side (or stacked) on alternating background/panel surfaces, one cell apart, each padded 2 columns × 1 row, equal shares |
+| Form | one label column (longest label + 2, at least 12) and one value column (the rest of the width, 60 by default); every text field, select and text area fills the value column |
+
+Rhythm: regions and panes pad 2 columns × 1 row; panes are 1 cell apart; sections 1 blank row apart; form fields 0 rows apart; tables and logs get 1 blank row above and below. All labels on a page start in one column; a text value column is at least 24 cells; a URL or path takes the whole value column. The gallery's Layout page is the reference screen.
+
 ## Overlays
 
 Every overlay goes through the Screen's single slot: confirm dialog, message dialog, help, command palette, dropdown (select). The screen below is dimmed; a click outside hides it; dropdowns are anchored under their field, the others centered. Dialog buttons: the chosen one is the cursor; `←→`/`tab` move, `enter` confirms, `y`/`n` shortcut, `esc` cancels. A destructive confirmation shows its title in the error color.

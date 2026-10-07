@@ -5,6 +5,7 @@ import {useMouseTarget} from '../input/Mouse.js';
 import {Glyphs} from '../theme/Glyphs.js';
 import {useTheme} from '../theme/ThemeContext.js';
 import {FieldBar} from './FieldBar.js';
+import {useFieldColumns} from './Form.js';
 import type {ListItem} from './List.js';
 
 type Props = {
@@ -23,8 +24,9 @@ type Props = {
  * One field with one row per option: the on glyph for the chosen one in the success color, the off glyph muted otherwise.
  * ↑↓ move the cursor (the accent-filled row); space or enter chooses; a click chooses directly.
  */
-export function RadioGroup({label, options, value, onChange, focused = false, onFocus, labelWidth = 14, onLeave}: Props) {
+export function RadioGroup({label, options, value, onChange, focused = false, onFocus, labelWidth, onLeave}: Props) {
   const theme = useTheme();
+  const {labelCol} = useFieldColumns(labelWidth);
   const box = useRef<DOMElement>(null);
   const [cursor, setCursor] = useState(() => Math.max(0, options.findIndex(option => option.id === value)));
   const choose = (index: number) => {
@@ -47,7 +49,7 @@ export function RadioGroup({label, options, value, onChange, focused = false, on
   ], {isActive: focused});
   return (
     <Box ref={box} flexDirection="row" height={options.length}>
-      <Box width={labelWidth} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
+      <Box width={labelCol} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
       <FieldBar focused={focused} surface="background" rows={options.length} />
       <Box flexDirection="column">
         {options.map((option, index) => {

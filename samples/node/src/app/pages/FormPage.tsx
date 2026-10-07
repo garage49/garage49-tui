@@ -1,7 +1,7 @@
 import {Box} from 'ink';
 import {useState} from 'react';
 import type {PageProps} from './Page.js';
-import {Checkbox, Label, RadioGroup, Select, TextField, Toggle, useKeys} from '@garage49/garage49-tui-ink';
+import {Checkbox, Form, Label, RadioGroup, Section, Select, TextField, Toggle, useKeys} from '@garage49/garage49-tui-ink';
 import type {ListItem} from '@garage49/garage49-tui-ink';
 
 const fields = ['name', 'path', 'theme', 'language', 'layout', 'mouse', 'vim', 'snapshot', 'cjk', 'restore'] as const;
@@ -48,9 +48,11 @@ export function FormPage({focused, report}: PageProps) {
 
   const is = (candidate: Field) => focused && field === candidate;
   return (
-    <Box flexDirection="column" width={60} flexShrink={0}>
+    <Box flexDirection="column" flexShrink={0}>
       <Label variant="muted">↑↓ fields (and radio options) · space chooses/toggles/opens · ←→ cycles a select</Label>
       <Box height={1} />
+      <Section title="Project">
+      <Form>
       <TextField label="Project name" value={name} onChange={setName} focused={is('name')} onFocus={() => setField('name')} />
       <TextField label="Path" value={path} onChange={setPath} placeholder="~/work/…" focused={is('path')} onFocus={() => setField('path')} />
       <Select label="Theme" options={themes} value={theme} onChange={option => { setTheme(option.id); report(`theme: ${option.label}`); }} focused={is('theme')} onFocus={() => setField('theme')} />
@@ -58,8 +60,9 @@ export function FormPage({focused, report}: PageProps) {
       <RadioGroup label="Layout" options={layouts} value={layout} onChange={option => { setLayout(option.id); report(`layout: ${option.label}`); }} focused={is('layout')} onFocus={() => setField('layout')} onLeave={step} />
       <Toggle label="Mouse" value={mouse} onChange={setMouse} focused={is('mouse')} onFocus={() => setField('mouse')} />
       <Toggle label="Vim keys" value={vim} onChange={setVim} focused={is('vim')} onFocus={() => setField('vim')} />
-      <Box height={1} />
-      <Label variant="muted">Tests to run</Label>
+      </Form>
+      </Section>
+      <Section title="Tests to run">
       {(['snapshot', 'cjk', 'restore'] as const).map(id => (
         <Checkbox
           key={id}
@@ -70,6 +73,7 @@ export function FormPage({focused, report}: PageProps) {
           onFocus={() => setField(id)}
         />
       ))}
+      </Section>
     </Box>
   );
 }

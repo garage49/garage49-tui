@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use iocraft::prelude::*;
 
 use super::field_bar::FieldBar;
+use super::form::UseFormLayout;
 use super::focus_region::RegionSurface;
 use super::list::ListItem;
 use crate::input::{Binding, MouseLayer, UseKeys, UseMouse};
@@ -27,6 +28,7 @@ pub struct RadioGroupProps {
 pub fn RadioGroup(props: &mut RadioGroupProps, mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let theme = hooks.use_context::<Theme>().clone();
     let t = theme.tokens;
+    let (label_col, _) = hooks.use_form_field(&props.label, props.label_width, None);
     let options = props.options.clone();
     let chosen = options.iter().position(|o| o.id == props.value).unwrap_or(0);
     let cursor = hooks.use_state(move || chosen);
@@ -57,7 +59,7 @@ pub fn RadioGroup(props: &mut RadioGroupProps, mut hooks: Hooks) -> impl Into<An
     let value = props.value.clone();
     element! {
         View(flex_direction: FlexDirection::Row, height: len as u16) {
-            View(width: props.label_width.unwrap_or(14), flex_shrink: 0.0_f32) { Text(content: props.label.clone(), color: if focused { t.text } else { t.text_muted }) }
+            View(width: label_col, flex_shrink: 0.0_f32) { Text(content: props.label.clone(), color: if focused { t.text } else { t.text_muted }) }
             FieldBar(focused: focused, surface: RegionSurface::Background, rows: len as u16)
             View(flex_direction: FlexDirection::Column) {
                 #(options.iter().enumerate().map(|(index, option)| {

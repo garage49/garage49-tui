@@ -1,4 +1,4 @@
-use garage49_tui_iocraft::{Binding, Checkbox, Label, LabelVariant, ListItem, MainFocus, RadioGroup, Select, TextField, Toggle, UseKeys, UseStatus};
+use garage49_tui_iocraft::{Binding, Checkbox, Form, Label, LabelVariant, ListItem, MainFocus, RadioGroup, Section, Select, TextField, Toggle, UseKeys, UseStatus};
 use iocraft::prelude::*;
 
 const FIELDS: [&str; 10] = ["name", "path", "theme", "language", "layout", "mouse", "vim", "snapshot", "cjk", "restore"];
@@ -28,9 +28,11 @@ pub fn FormPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let check_ids = ["snapshot", "cjk", "restore"];
     let checks_now = checks.get();
     element! {
-        View(flex_direction: FlexDirection::Column, width: 60, flex_shrink: 0.0_f32) {
+        View(flex_direction: FlexDirection::Column, flex_shrink: 0.0_f32) {
             Label(content: "↑↓ fields (and radio options) · space chooses/toggles/opens · ←→ cycles a select", variant: LabelVariant::Muted)
             View(height: 1)
+            Section(title: "Project".to_string()) {
+            Form {
             TextField(label: "Project name", value: name.read().clone(), on_change: move |v: String| { let mut name = name; name.set(v) }, focused: is("name"), on_focus: focus_on("name"))
             TextField(label: "Path", value: path.read().clone(), placeholder: "~/work/…".to_string(), on_change: move |v: String| { let mut path = path; path.set(v) }, focused: is("path"), on_focus: focus_on("path"))
             Select(label: "Theme", options: themes, value: theme.read().clone(), on_change: move |o: ListItem| { let mut theme = theme; status.report(&format!("theme: {}", o.label)); theme.set(o.id) }, focused: is("theme"), on_focus: focus_on("theme"))
@@ -38,8 +40,9 @@ pub fn FormPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
             RadioGroup(label: "Layout", options: layouts, value: layout.read().clone(), on_change: move |o: ListItem| { let mut layout = layout; status.report(&format!("layout: {}", o.label)); layout.set(o.id) }, focused: is("layout"), on_focus: focus_on("layout"), on_leave: move |d: i32| step(d))
             Toggle(label: "Mouse", value: mouse.get(), on_change: move |v: bool| { let mut mouse = mouse; mouse.set(v) }, focused: is("mouse"), on_focus: focus_on("mouse"))
             Toggle(label: "Vim keys", value: vim.get(), on_change: move |v: bool| { let mut vim = vim; vim.set(v) }, focused: is("vim"), on_focus: focus_on("vim"))
-            View(height: 1)
-            Label(content: "Tests to run", variant: LabelVariant::Muted)
+            }
+            }
+            Section(title: "Tests to run".to_string()) {
             #((0..3).map(|i| {
                 let id = check_ids[i];
                 element! {
@@ -47,6 +50,7 @@ pub fn FormPage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
                         on_change: move |v: bool| { let mut next = checks_now; next[i] = v; let mut checks = checks; checks.set(next); status.report(&format!("{id}: {}", if v { "checked" } else { "unchecked" })); })
                 }
             }))
+            }
         }
     }
 }

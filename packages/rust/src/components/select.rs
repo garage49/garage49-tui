@@ -4,6 +4,7 @@ use iocraft::prelude::*;
 
 use super::dropdown::Dropdown;
 use super::field_bar::FieldBar;
+use super::form::UseFormLayout;
 use super::list::ListItem;
 use super::screen::OverlayHandle;
 use crate::input::{Binding, MouseLayer, UseKeys, UseMouse};
@@ -29,7 +30,7 @@ pub fn Select(props: &mut SelectProps, mut hooks: Hooks) -> impl Into<AnyElement
     let t = theme.tokens;
     let overlay = *hooks.use_context::<OverlayHandle>();
     let rect = hooks.use_component_rect();
-    let label_width = props.label_width.unwrap_or(14);
+    let (label_width, value_width) = hooks.use_form_field(&props.label, props.label_width, props.width);
     let options = props.options.clone();
     let value = props.value.clone();
     let index = options.iter().position(|o| o.id == value).unwrap_or(0);
@@ -75,7 +76,7 @@ pub fn Select(props: &mut SelectProps, mut hooks: Hooks) -> impl Into<AnyElement
         View(flex_direction: FlexDirection::Row, height: 1) {
             View(width: label_width, flex_shrink: 0.0_f32) { Text(content: props.label.clone(), color: if focused { t.text } else { t.text_muted }) }
             FieldBar(focused: focused)
-            View(width: props.width.unwrap_or(24), background_color: t.surface, padding_left: 1, padding_right: 1, flex_direction: FlexDirection::Row) {
+            View(width: value_width, background_color: t.surface, padding_left: 1, padding_right: 1, flex_direction: FlexDirection::Row) {
                 View(flex_grow: 1.0_f32, overflow: Overflow::Hidden) { Text(content: current, color: t.text, wrap: TextWrap::NoWrap) }
                 Text(content: " ▾", color: if focused { t.text } else { t.text_muted })
             }

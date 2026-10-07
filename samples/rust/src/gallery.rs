@@ -1,7 +1,7 @@
 use garage49_tui_iocraft::{App, Command, Content, HelpEntry, KeyHint, ListItem, Main, Nav, Sidebar, StatusSegment, StatusTone, Tab};
 use iocraft::prelude::*;
 
-use crate::pages::{DialogsPage, EditingPage, FormPage, HelpPage, HomePage, IndicatorsPage, LabelsPage, ListPage, LogPage, SettingsPage, TablePage, TabsPage, TreePage};
+use crate::pages::{DialogsPage, EditingPage, FormPage, HelpPage, HomePage, IndicatorsPage, LabelsPage, LayoutPage, ListPage, LogPage, SettingsPage, TablePage, TabsPage, TreePage};
 
 struct Page {
     item: ListItem,
@@ -12,6 +12,7 @@ fn pages() -> Vec<Page> {
     vec![
         Page { item: ListItem::new("home", "Home").section("Overview"), title: "Home" },
         Page { item: ListItem::new("labels", "Labels & tokens").section("Overview"), title: "Labels and color tokens" },
+        Page { item: ListItem::new("layout", "Layout").section("Overview"), title: "Layout · sections, forms and splits" },
         Page { item: ListItem::new("tabs", "Tabs").section("Navigation"), title: "Tabs" },
         Page { item: ListItem::new("tree", "Tree view").section("Navigation"), title: "Tree view" },
         Page { item: ListItem::new("list", "List").section("Data"), title: "List" },
@@ -44,6 +45,7 @@ pub fn Gallery(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
         let current = pages.iter().find(|p| p.item.id == page_id).unwrap_or(&pages[0]);
         let body = match current.item.id.as_str() {
             "labels" => element!(LabelsPage).into_any(),
+            "layout" => element!(LayoutPage).into_any(),
             "tabs" => element!(TabsPage).into_any(),
             "tree" => element!(TreePage).into_any(),
             "list" => element!(ListPage).into_any(),

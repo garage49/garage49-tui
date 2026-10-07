@@ -5,6 +5,7 @@ import {useMouseTarget} from '../input/Mouse.js';
 import {useTyping} from '../shell/Typing.js';
 import {useTheme} from '../theme/ThemeContext.js';
 import {FieldBar} from './FieldBar.js';
+import {useFieldColumns} from './Form.js';
 
 type Props = {
   label: string;
@@ -19,8 +20,9 @@ type Props = {
 };
 
 /** A one-line form field: label on the left, the value on a surface; the focused field gets the accent bar. */
-export function TextField({label, value, onChange, placeholder = '', focused = false, onFocus, labelWidth = 14, secret = false}: Props) {
+export function TextField({label, value, onChange, placeholder = '', focused = false, onFocus, labelWidth, secret = false}: Props) {
   const theme = useTheme();
+  const {labelCol} = useFieldColumns(labelWidth);
   useTyping(focused);
   const box = useRef<DOMElement>(null);
   useMouseTarget(box, {onPress: () => onFocus?.()});
@@ -36,7 +38,7 @@ export function TextField({label, value, onChange, placeholder = '', focused = f
   ], {isActive: focused, onText: text => emit(pending.current + text)});
   return (
     <Box ref={box} flexDirection="row" height={1}>
-      <Box width={labelWidth} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
+      <Box width={labelCol} flexShrink={0}><Text color={focused ? theme.tokens.text : theme.tokens.textMuted}>{label}</Text></Box>
       <FieldBar focused={focused} />
       <Box flexGrow={1} backgroundColor={theme.tokens.surface} paddingX={1}>
         <Text color={value ? theme.tokens.text : theme.tokens.textMuted} wrap="truncate-end">{shownText(value, placeholder, secret)}{focused ? '█' : ''}</Text>

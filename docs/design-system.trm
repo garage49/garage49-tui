@@ -270,6 +270,49 @@ concept _Field_ = {
   - A click on a _Field_ must make it the editing field.
 }
 
+concept _Layout_Rhythm_ = {
+  The fixed spacing and alignment every page follows, so that pages built by different people and agents look like one application.
+.relations
+  applied by _Section_
+  applied by _Split_
+  applied by _Form_
+.contract
+  - A region or pane must pad two cells on the left and right and one row above and below its content.
+  - Adjacent panes must be one cell apart; adjacent sections must be one blank row apart; the fields of one form must be zero rows apart; a table or log must have one blank row above and below.
+  - A page must be composed of _Section_, _Split_, _Form_ and the data and field components; a page must not place padding or widths of its own on plain views.
+  - All labels on a page must start in one column, and all values of one _Form_ must start in one column and share one width.
+  - A text value column must be at least 24 cells wide; a URL or path takes the whole value column.
+}
+
+concept _Section_ = {
+  One titled area of a page: a heading, then its body directly under it.
+.relations
+  applies _Layout_Rhythm_
+.contract
+  - A _Section_ title must use the heading token in bold; the body must start on the next row without indent.
+  - A _Section_ must end with one blank row before whatever follows it.
+}
+
+concept _Split_ = {
+  Sub-panes placed side by side or stacked inside a page, each on its own surface.
+.relations
+  applies _Layout_Rhythm_
+.contract
+  - Panes must alternate the background and panel tokens so their edges show without lines; panes must be one cell apart and padded two cells by one row.
+  - Panes must share the space equally.
+}
+
+concept _Form_ = {
+  A group of fields that share one label column and one value column.
+.relations
+  applies _Layout_Rhythm_
+  has_member _Field_
+.contract
+  - The label column must be as wide as the longest label plus two cells, and at least 12 cells.
+  - The value column must be the form's width minus the label column; every text field, select and text area in the form must fill it.
+  - A _Form_ must be 60 cells wide unless the page gives another width.
+}
+
 concept _Label_ = {
   Text in one of the theme's roles: default, muted, bright, heading, accent, success, warning or error.
 .contract

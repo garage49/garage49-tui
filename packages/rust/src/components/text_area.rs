@@ -3,6 +3,7 @@ use std::sync::{Arc, Mutex};
 use iocraft::prelude::*;
 
 use super::field_bar::FieldBar;
+use super::form::UseFormLayout;
 use super::scrollbar::Scrollbar;
 use super::text_buffer::TextBuffer;
 use crate::input::{Binding, MouseLayer, UseKeys, UseMouse};
@@ -31,6 +32,7 @@ pub fn TextArea(props: &mut TextAreaProps, mut hooks: Hooks) -> impl Into<AnyEle
     let theme = hooks.use_context::<Theme>().clone();
     let t = theme.tokens;
     hooks.use_typing(props.focused);
+    let (label_col, _) = hooks.use_form_field(&props.label, props.label_width, None);
     let buffer = props.buffer.clone().unwrap_or_else(|| TextBuffer::from_text(""));
     let rows = props.rows.unwrap_or(5).max(1) as usize;
     let scroll_top = hooks.use_state(|| 0usize);
@@ -144,7 +146,7 @@ pub fn TextArea(props: &mut TextAreaProps, mut hooks: Hooks) -> impl Into<AnyEle
         .collect();
     element! {
         View(flex_direction: FlexDirection::Row, height: rows as u16) {
-            View(width: props.label_width.unwrap_or(14), flex_shrink: 0.0_f32) { Text(content: props.label.clone(), color: if focused { t.text } else { t.text_muted }) }
+            View(width: label_col, flex_shrink: 0.0_f32) { Text(content: props.label.clone(), color: if focused { t.text } else { t.text_muted }) }
             FieldBar(focused: focused, rows: rows as u16)
             View(flex_direction: FlexDirection::Column, flex_grow: 1.0_f32, background_color: t.surface, padding_left: 1, padding_right: 1) {
                 #(if empty { vec![element! { Text(content: placeholder.clone(), color: t.text_muted) }.into_any()] } else { lines })
