@@ -80,13 +80,13 @@ An app is composed as a tree; everything else is a default:
 
 ```
 App                       screen, theme, mouse, overlay slot, focus cycling, status line, key hint bar
-├─ Nav                    two rows: logo block + large tabs (▔ under the active one) + context at the right
+├─ (Nav)                  two rows: logo block + large tabs (▔ under the active one) + context at the right
 └─ Content                a row
    ├─ Sidebar (optional)  panel with a sectioned list, width 26 by default (a prop)
    └─ Main                page title + page; takes the remaining width
 ```
 
-The three agreed layouts are the three trees: top navigation only, sidebar only, both. The status line shows `▪ last action · app segments ‖ mouse · theme · columns×rows · clock`; the key hint bar shows muted context at the left and `key label` pairs at the right (clickable).
+Nav and Sidebar are each optional, but at least one of them must be present. The three agreed layouts are the three trees: `App > Nav + Content > Main` (top navigation only), `App > Content > Sidebar + Main` (sidebar only) and `App > Nav + Content > Sidebar + Main` (both). The status line shows `▪ last action · app segments ‖ mouse · theme · columns×rows · clock`; the key hint bar shows muted context at the left and `key label` pairs at the right (clickable).
 
 ## Overlays
 

@@ -184,7 +184,7 @@ concept _Overlay_ = {
 }
 
 concept _App_Frame_ = {
-  The application tree every app is composed as: the frame, a navigation header, then content with an optional sidebar and the main page.
+  The application tree every app is composed as: the frame, an optional navigation header, then content with an optional sidebar and the main page.
 .relations
   provides _Theme_
   provides _Mouse_Reporting_
@@ -197,6 +197,7 @@ concept _App_Frame_ = {
   has_part _Overlay_
 .contract
   - An _App_Frame_ must provide the screen, the _Theme_, _Mouse_Reporting_, the _Overlay_ slot, _Cycle_Focus_, the _Status_Line_ and the _Key_Hint_Bar_; an application adds only its regions and pages.
+  - An _App_Frame_ must contain a _Navigation_Header_, a _Sidebar_, or both, and always a _Main_Page_.
   - An _App_Frame_ must render the three agreed layouts from the tree alone: a header only, a sidebar only, or both.
   - An _App_Frame_ must show the quit confirmation on q, the help on ?, and the command palette on ctrl+p, and must add Toggle theme, Toggle mouse, Keyboard shortcuts and Quit to the palette.
   - An _App_Frame_ must show a notice instead of the layout while the terminal is smaller than 80 by 24 cells.

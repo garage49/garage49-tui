@@ -40,7 +40,8 @@ pub struct AppProps<'a> {
 }
 
 /// The application frame: the screen, theme, mouse, overlay slot, focus cycling and the two bottom
-/// bars. Put a Nav, then Content with a Sidebar and a Main inside; everything else is a default.
+/// bars. Compose `App > (Nav) + Content > (Sidebar) + Main`: Nav and Sidebar are optional, but at
+/// least one of them must be present; everything else is a default.
 #[component]
 pub fn App<'a>(props: &mut AppProps<'a>, mut hooks: Hooks) -> impl Into<AnyElement<'a>> {
     let registry = hooks.use_const(|| Arc::new(Mutex::new(FocusRegistry::default()))).clone();
