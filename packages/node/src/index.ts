@@ -33,6 +33,7 @@ export {ListLayout, type ListRow} from './components/ListLayout.js';
 export {Selection} from './components/Selection.js';
 export {Table, type Column} from './components/Table.js';
 export {TreeView, TreeLayout, type TreeNode, type TreeRow} from './components/TreeView.js';
+export {TreeClick, type TreeClickAction} from './components/TreeClick.js';
 export {LogView, type LogEntry, type LogLevel} from './components/LogView.js';
 export {Scrollbar, ScrollThumb} from './components/Scrollbar.js';
 

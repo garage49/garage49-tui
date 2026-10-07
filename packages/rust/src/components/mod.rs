@@ -64,4 +64,4 @@ pub use text_field::{TextField, TextFieldProps};
 pub use tabs::{Tab, Tabs, TabsProps, TabsSize};
 pub use toggle::{Toggle, ToggleProps};
 pub use top_nav::{TopNav, TopNavProps};
-pub use tree_view::{TreeLayout, TreeNode, TreeRow, TreeView, TreeViewProps};
+pub use tree_view::{TreeClick, TreeClickAction, TreeLayout, TreeNode, TreeRow, TreeView, TreeViewProps};

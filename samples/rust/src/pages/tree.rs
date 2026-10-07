@@ -43,11 +43,11 @@ pub fn TreePage(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let collapse = { let current = current.clone(); move || { if let Some(row) = &current { if row.expanded { toggle(row, Some(false)) } else if let Some(parent) = &row.parent_id { let mut selected = selected; selected.set(Some(parent.clone())); } } } };
     let enter = { let current = current.clone(); move || { if let Some(row) = &current { toggle(row, None) } } };
     hooks.use_keys(focused, vec![Binding::new(&["up", "k"], up), Binding::new(&["down", "j"], down), Binding::new(&["right", "l"], expand), Binding::new(&["left", "h"], collapse), Binding::new(&["enter", "space"], enter)], None);
-    let click = move |row: TreeRow| { let mut selected = selected; selected.set(Some(row.node.id.clone())); toggle(&row, None); };
-    let wheel = move |row: TreeRow| { let mut selected = selected; selected.set(Some(row.node.id)); };
+    let on_toggle = move |row: TreeRow| { let mut selected = selected; selected.set(Some(row.node.id.clone())); toggle(&row, None); };
+    let on_select = move |row: TreeRow| { let mut selected = selected; selected.set(Some(row.node.id)); };
     element! {
         View(flex_direction: FlexDirection::Column, width: 50) {
-            TreeView(nodes: tree, expanded: expanded.read().clone(), selected_id: current_id, focused: focused, on_click: click, on_select: wheel)
+            TreeView(nodes: tree, expanded: expanded.read().clone(), selected_id: current_id, focused: focused, on_select: on_select, on_toggle: on_toggle)
         }
     }
 }

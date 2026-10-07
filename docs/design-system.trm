@@ -300,7 +300,8 @@ concept _Tree_View_ = {
   has_member _Cursor_
 .contract
   - → or l must expand a collapsed branch and otherwise step to the next row; ← or h must collapse an expanded branch and otherwise move to the parent.
-  - enter or space must toggle the branch under the _Cursor_; a click must select the row and toggle it.
+  - enter or space must toggle the branch under the _Cursor_.
+  - A click on a row must move the _Cursor_ to it; a click on the row's ▸/▾ marker, or on the row the _Cursor_ is already on, must toggle the branch instead (the file-manager convention).
 }
 
 concept _Log_View_ = {

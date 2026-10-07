@@ -30,6 +30,28 @@ pub struct TreeRow {
     pub parent_id: Option<String>,
 }
 
+/// What a mouse click on a tree row means, by the usual file-manager convention: a click on the
+/// ▸/▾ marker toggles the branch; a click on the row that is already selected toggles it too; a
+/// click on any other row only selects it.
+pub struct TreeClick;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TreeClickAction {
+    Toggle,
+    Select,
+}
+
+impl TreeClick {
+    pub fn decide(on_marker: bool, already_selected: bool) -> TreeClickAction {
+        if on_marker || already_selected { TreeClickAction::Toggle } else { TreeClickAction::Select }
+    }
+
+    /// Whether column `x` of a row at `depth` is the marker cell (after the row padding and the indent).
+    pub fn is_marker(x: i32, depth: usize) -> bool {
+        x == 1 + depth as i32 * 2
+    }
+}
+
 /// Flattens a tree into the rows that are visible given the expanded set.
 pub struct TreeLayout;
 
@@ -57,11 +79,15 @@ pub struct TreeViewProps {
     pub expanded: Vec<String>,
     pub selected_id: Option<String>,
     pub focused: bool,
-    pub on_click: HandlerMut<'static, TreeRow>,
+    /// The cursor moves to a row (click on an unselected row, or the wheel).
     pub on_select: HandlerMut<'static, TreeRow>,
+    /// A branch opens or closes (click on the ▸/▾ marker, or on the row that is already selected).
+    pub on_toggle: HandlerMut<'static, TreeRow>,
 }
 
-/// Indented rows with ▸/▾ markers for branches; the selected row is filled with the accent color. Click selects and toggles.
+/// Indented rows with ▸/▾ markers for branches; the selected row is filled with the accent color.
+/// Mouse, by the file-manager convention: a click selects a row, a click on its marker or on the
+/// already selected row toggles it; the wheel moves the cursor.
 #[component]
 pub fn TreeView(props: &mut TreeViewProps, mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let theme = hooks.use_context::<Theme>().clone();
@@ -72,13 +98,18 @@ pub fn TreeView(props: &mut TreeViewProps, mut hooks: Hooks) -> impl Into<AnyEle
     {
         let rows = rows.clone();
         let selected = props.selected_id.clone();
-        let mut on_click = props.on_click.take();
+        let mut on_toggle = props.on_toggle.take();
         let mut on_select = props.on_select.take();
         hooks.use_mouse(allowed, move |event| match event.kind {
             MouseEventKind::Down(MouseButton::Left) => {
-                if event.local_y >= 0 {
-                    if let Some(row) = rows.get(event.local_y as usize) {
-                        on_click(row.clone());
+                if event.local_y < 0 {
+                    return;
+                }
+                if let Some(row) = rows.get(event.local_y as usize) {
+                    let already = Some(&row.node.id) == selected.as_ref();
+                    match TreeClick::decide(TreeClick::is_marker(event.local_x, row.depth), already) {
+                        TreeClickAction::Toggle => on_toggle(row.clone()),
+                        TreeClickAction::Select => on_select(row.clone()),
                     }
                 }
             }
@@ -128,5 +159,13 @@ mod tests {
         assert_eq!(ids, vec![("a", 0, None), ("a1", 1, Some("a")), ("a2", 1, Some("a")), ("b", 0, None)]);
         let hidden = TreeLayout::rows(&nodes, &HashSet::from(["a2".to_string()]));
         assert_eq!(hidden.iter().map(|r| r.node.id.as_str()).collect::<Vec<_>>(), vec!["a", "b"]);
+    }
+
+    #[test]
+    fn a_click_selects_unless_it_hits_the_marker_or_the_selected_row() {
+        assert_eq!(TreeClick::decide(false, false), TreeClickAction::Select);
+        assert_eq!(TreeClick::decide(true, false), TreeClickAction::Toggle);
+        assert_eq!(TreeClick::decide(false, true), TreeClickAction::Toggle);
+        assert!(TreeClick::is_marker(1, 0) && TreeClick::is_marker(3, 1) && !TreeClick::is_marker(4, 1));
     }
 }

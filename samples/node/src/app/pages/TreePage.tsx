@@ -66,8 +66,8 @@ export function TreePage({focused, report}: PageProps) {
         expanded={expanded}
         selectedId={selectedId}
         focused={focused}
-        onClick={row => { setSelectedId(row.node.id); toggle(row); }}
         onSelect={row => setSelectedId(row.node.id)}
+        onToggle={row => { setSelectedId(row.node.id); toggle(row); }}
       />
     </Box>
   );

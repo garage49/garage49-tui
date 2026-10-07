@@ -3,6 +3,7 @@ import {useRef} from 'react';
 import {useMouseTarget} from '../input/Mouse.js';
 import {Glyphs} from '../theme/Glyphs.js';
 import {useTheme} from '../theme/ThemeContext.js';
+import {TreeClick} from './TreeClick.js';
 
 export type TreeNode = {
   readonly id: string;
@@ -29,19 +30,27 @@ type Props = {
   expanded: ReadonlySet<string>;
   selectedId?: string;
   focused?: boolean;
-  onClick?: (row: TreeRow) => void;
+  /** The cursor moves to a row (click on an unselected row, or the wheel). */
   onSelect?: (row: TreeRow) => void;
+  /** A branch opens or closes (click on the ▸/▾ marker, or on the row that is already selected). */
+  onToggle?: (row: TreeRow) => void;
 };
 
-/** Indented rows with ▸/▾ markers for branches; the selected row is filled with the accent color. Click selects and toggles. */
-export function TreeView({nodes, expanded, selectedId, focused = true, onClick, onSelect}: Props) {
+/**
+ * Indented rows with ▸/▾ markers for branches; the selected row is filled with the accent color.
+ * Mouse, by the file-manager convention: a click selects a row, a click on its marker or on the
+ * already selected row toggles it; the wheel moves the cursor.
+ */
+export function TreeView({nodes, expanded, selectedId, focused = true, onSelect, onToggle}: Props) {
   const theme = useTheme();
   const box = useRef<DOMElement>(null);
   const rows = TreeLayout.rows(nodes, expanded);
   useMouseTarget(box, {
     onPress: event => {
       const row = rows[event.localY];
-      if (row && event.button === 'left') onClick?.(row);
+      if (!row || event.button !== 'left') return;
+      const action = TreeClick.decide(TreeClick.isMarker(event.localX, row.depth), row.node.id === selectedId);
+      if (action === 'toggle') onToggle?.(row); else onSelect?.(row);
     },
     onWheel: event => {
       const index = rows.findIndex(row => row.node.id === selectedId);
