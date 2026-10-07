@@ -4,11 +4,9 @@ The garage49 TUI design system for Rust: OpenCode's look and feel as [iocraft](h
 
 ## Install
 
-Until the crate is published, depend on the repository:
-
 ```toml
 [dependencies]
-garage49-tui-iocraft = { path = "../garage49-tui/packages/rust" }   # or git = "https://github.com/garage49/garage49-tui"
+garage49-tui-iocraft = "0.1"
 iocraft = "0.9"
 smol = "2"   # for use_future timers (spinners, polling)
 ```
