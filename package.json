@@ -4,7 +4,7 @@
   "private": true,
   "packageManager": "pnpm@10.26.2",
   "scripts": {
-    "check": "pnpm --filter ./packages/node check && pnpm --filter ./samples/node check && pnpm -r build",
+    "check": "pnpm --filter ./packages/node check && pnpm --filter ./packages/node build && pnpm --filter ./samples/node check && pnpm -r build",
     "build": "pnpm -r build",
     "complexity": "pnpm -r complexity",
     "test": "pnpm -r test",
