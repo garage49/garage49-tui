@@ -31,9 +31,11 @@ pub fn Palette(props: &mut PaletteProps, mut hooks: Hooks) -> impl Into<AnyEleme
     let mut on_close = props.on_close.take();
     let mover = |delta: i32| {
         let ids = ids.clone();
-        let current = current.clone();
         let mut selected = selected;
-        move || selected.set(Selection::move_by(&ids, current.as_deref(), delta))
+        move || {
+            let now = Selection::ensure(&ids, selected.read().as_deref());
+            selected.set(Selection::move_by(&ids, now.as_deref(), delta))
+        }
     };
     let pick = {
         let on_pick = on_pick.clone();

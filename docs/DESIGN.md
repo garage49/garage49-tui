@@ -105,7 +105,7 @@ Every overlay goes through the Screen's single slot: confirm dialog, message dia
 | Tabs | small: one row, active label filled · large: two rows, ▔ under the active label | ←→ hl, click |
 | TopNav | logo block (violet) + large tabs + right text on the surface row | as Tabs; focus bar on the logo's first column |
 | StatusLine, KeyHintBar | panel row with segments · context + key/label pairs | hints clickable |
-| TextField | label · field bar · value on a surface, `█` cursor | typing, backspace |
+| TextField | label · field bar · value on a surface, `█` cursor; `secret` shows `*` per character | typing, backspace |
 | TextArea | several rows, inverted-cell cursor, scrollbar | arrows, enter splits, backspace joins, pageup/pagedown, home/end, wheel scrolls, edge leave |
 | Input | OpenCode's input box: bar column, surface, half-block edge, optional footer | typing, enter submits |
 | Select | label · field bar · value ▾ | enter/space opens the dropdown, ←→ cycle, click opens |

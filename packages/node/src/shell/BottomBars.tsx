@@ -33,6 +33,7 @@ export function BottomBars({actions, hints, status, context, onNext, showStatusL
     return () => clearInterval(timer);
   }, []);
   const onHint = (hint: KeyHint) => {
+    if (hint.run) return hint.run();
     const run: Record<string, () => void> = {tab: onNext, 'ctrl+p': actions.openPalette, '?': actions.openHelp, q: actions.confirmQuit};
     run[hint.key]?.();
   };

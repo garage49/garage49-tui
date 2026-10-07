@@ -41,8 +41,8 @@ export function RadioGroup({label, options, value, onChange, focused = false, on
     },
   });
   useKeys([
-    {keys: ['up', 'k'], run: () => (cursor === 0 ? onLeave?.(-1) : setCursor(cursor - 1))},
-    {keys: ['down', 'j'], run: () => (cursor === options.length - 1 ? onLeave?.(1) : setCursor(cursor + 1))},
+    {keys: ['up', 'k'], run: () => (cursor === 0 ? onLeave?.(-1) : setCursor(c => Math.max(0, c - 1)))},
+    {keys: ['down', 'j'], run: () => (cursor === options.length - 1 ? onLeave?.(1) : setCursor(c => Math.min(options.length - 1, c + 1)))},
     {keys: ['space', 'enter'], run: () => choose(cursor)},
   ], {isActive: focused});
   return (

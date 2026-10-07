@@ -50,11 +50,11 @@ pub fn App<'a>(props: &mut AppProps<'a>, mut hooks: Hooks) -> impl Into<AnyEleme
     let registry = hooks.use_const(|| Arc::new(Mutex::new(FocusRegistry::default()))).clone();
     let focused = hooks.use_state(|| None::<u64>);
     let last_action = hooks.use_state(|| "ready".to_string());
-    let editing = hooks.use_state(|| None::<u64>);
+    let typing = hooks.use_const(TypingState::new).clone();
     registry.lock().expect("focus registry").next_frame();
+    typing.next_frame();
     let focus = FocusState { registry, focused };
     let status = StatusState { last_action };
-    let typing = TypingState { editing };
     element! {
         Screen(min_columns: props.min_columns, min_rows: props.min_rows) {
             ContextProvider(value: Context::owned(focus.clone())) {
@@ -112,7 +112,7 @@ fn Frame<'a>(props: &mut FrameProps<'a>, mut hooks: Hooks) -> impl Into<AnyEleme
     let mouse = *hooks.use_context::<MouseState>();
     let focus = hooks.use_context::<FocusState>().clone();
     let status = *hooks.use_context::<StatusState>();
-    let typing = hooks.use_context::<TypingState>().typing();
+    let typing = hooks.use_context::<TypingState>().clone();
     let mut system = hooks.use_context_mut::<SystemContext>();
     let exit_flag = hooks.use_state(|| false);
     if exit_flag.get() {
@@ -193,12 +193,15 @@ fn Frame<'a>(props: &mut FrameProps<'a>, mut hooks: Hooks) -> impl Into<AnyEleme
     if descends {
         bindings.push(Binding::new(&["enter"], { let f = focus.clone(); move || f.move_by(1, false) }));
     }
-    if !typing {
-        bindings.push(Binding::new(&["?"], { let a = actions.help.clone(); move || a() }));
-        bindings.push(Binding::new(&["q"], { let a = actions.quit.clone(); move || a() }));
-        bindings.push(Binding::new(&["t"], { let a = actions.theme.clone(); move || a() }));
-        bindings.push(Binding::new(&["m"], { let a = actions.mouse.clone(); move || a() }));
-    }
+    // Letters are gated at key time: a text field editing in the latest frame takes them as text.
+    let letter = |keys: &'static [&'static str], action: Arc<dyn Fn() + Send + Sync>| {
+        let typing = typing.clone();
+        Binding::new(keys, move || if !typing.typing() { action() })
+    };
+    bindings.push(letter(&["?"], actions.help.clone()));
+    bindings.push(letter(&["q"], actions.quit.clone()));
+    bindings.push(letter(&["t"], actions.theme.clone()));
+    bindings.push(letter(&["m"], actions.mouse.clone()));
     hooks.use_keys(!overlay.is_open(), bindings, None);
 
     let (columns, rows) = hooks.use_terminal_size();
@@ -219,6 +222,7 @@ fn Frame<'a>(props: &mut FrameProps<'a>, mut hooks: Hooks) -> impl Into<AnyEleme
         let actions = actions.clone();
         let focus = focus.clone();
         move |hint: KeyHint| match hint.key.as_str() {
+            _ if hint.run.is_some() => (hint.run.as_ref().expect("checked"))(),
             "tab" => focus.move_by(1, true),
             "ctrl+p" => (actions.palette)(),
             "?" => (actions.help)(),

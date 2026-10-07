@@ -26,7 +26,7 @@ pub fn Dropdown(props: &mut DropdownProps, mut hooks: Hooks) -> impl Into<AnyEle
     let current = Selection::ensure(&ids, cursor.read().as_deref());
     let on_pick = Arc::new(Mutex::new(props.on_pick.take()));
     let mut on_close = props.on_close.take();
-    let mover = |delta: i32| { let ids = ids.clone(); let current = current.clone(); let mut cursor = cursor; move || cursor.set(Selection::move_by(&ids, current.as_deref(), delta)) };
+    let mover = |delta: i32| { let ids = ids.clone(); let mut cursor = cursor; move || { let now = Selection::ensure(&ids, cursor.read().as_deref()); cursor.set(Selection::move_by(&ids, now.as_deref(), delta)) } };
     let pick = { let on_pick = on_pick.clone(); let items = props.items.clone(); let current = current.clone(); move || { if let Some(item) = items.iter().find(|i| Some(&i.id) == current.as_ref()) { (on_pick.lock().expect("handler"))(item.clone()); } } };
     hooks.use_keys(true, vec![Binding::new(&["esc"], move || on_close(())), Binding::new(&["up"], mover(-1)), Binding::new(&["down"], mover(1)), Binding::new(&["enter"], pick)], None);
     let click = { let on_pick = on_pick.clone(); move |item: ListItem| (on_pick.lock().expect("handler"))(item) };

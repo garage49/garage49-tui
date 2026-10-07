@@ -241,6 +241,7 @@ concept _Status_Line_ = {
   The row above the key hint bar: the last reported action, the application's segments, and at the right the mouse state, theme name, terminal size and clock.
 .contract
   - The _Status_Line_ must use the panel token and separate segments with a muted middle dot.
+  - The right segments must keep their width; the left segments must be cut to the remaining width with an ellipsis, never run into the right ones.
   - The first segment must be ▪ followed by the last action a page reported, in the success token.
 }
 
@@ -248,7 +249,7 @@ concept _Key_Hint_Bar_ = {
   The bottom row: muted context at the left, key and label pairs at the right.
 .contract
   - A pair must draw the key in the text token and the label in textMuted, two cells apart from the next pair.
-  - A click on a pair must run the key's action.
+  - A click on a pair must run the key's action; an application's own pair carries its action.
   - The built-in pairs must be tab focus, ctrl+p commands, ? help and q quit, after the application's own.
 }
 
@@ -338,6 +339,8 @@ concept _Text_Field_ = {
   is_a _Field_
 .contract
   - Typing must append text; backspace must remove the last character; a placeholder in textMuted must show while the value is empty.
+  - A secret _Text_Field_ must show one * per character instead of the value.
+  - Keys that arrive faster than the screen is redrawn must each apply to the latest value, never to the value of the last drawn frame.
 }
 
 concept _Text_Area_ = {

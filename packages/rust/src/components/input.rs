@@ -33,9 +33,11 @@ pub fn Input<'a>(props: &mut InputProps<'a>, mut hooks: Hooks) -> impl Into<AnyE
     let on_change = std::sync::Arc::new(std::sync::Mutex::new(props.on_change.take()));
     let mut on_submit = props.on_submit.take();
     let value = props.value.clone();
-    let submit = { let value = value.clone(); move || on_submit(value.clone()) };
-    let backspace = { let on_change = on_change.clone(); let value = value.clone(); move || { let mut v = value.clone(); v.pop(); (on_change.lock().expect("handler"))(v) } };
-    let typed = { let value = value.clone(); move |text: String| (on_change.lock().expect("handler"))(format!("{value}{text}")) };
+    // Keys faster than renders chain on `pending`, not on the value captured at the last render.
+    let pending = std::sync::Arc::new(std::sync::Mutex::new(value.clone()));
+    let submit = { let pending = pending.clone(); move || on_submit(pending.lock().expect("pending").clone()) };
+    let backspace = { let on_change = on_change.clone(); let pending = pending.clone(); move || { let mut v = pending.lock().expect("pending"); v.pop(); (on_change.lock().expect("handler"))(v.clone()) } };
+    let typed = { let pending = pending.clone(); move |text: String| { let mut v = pending.lock().expect("pending"); v.push_str(&text); (on_change.lock().expect("handler"))(v.clone()) } };
     hooks.use_keys(props.focused, vec![Binding::new(&["enter"], submit), Binding::new(&["backspace", "delete"], backspace)], Some(Box::new(typed)));
     let focused = props.focused;
     let bar = if focused { Glyphs::BAR } else { " " };

@@ -3,15 +3,34 @@ use iocraft::prelude::*;
 use crate::input::{MouseLayer, UseMouse};
 use crate::theme::{TextWidth, Theme};
 
-#[derive(Clone, Debug, PartialEq, Default)]
+#[derive(Clone, Default)]
 pub struct KeyHint {
     pub key: String,
     pub label: String,
+    /// What a click on the pair runs; the App's built-in hints have none and are routed by key.
+    pub run: Option<std::sync::Arc<dyn Fn() + Send + Sync>>,
+}
+
+impl std::fmt::Debug for KeyHint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("KeyHint").field("key", &self.key).field("label", &self.label).finish()
+    }
+}
+
+impl PartialEq for KeyHint {
+    fn eq(&self, other: &Self) -> bool {
+        self.key == other.key && self.label == other.label
+    }
 }
 
 impl KeyHint {
     pub fn new(key: &str, label: &str) -> Self {
-        Self { key: key.into(), label: label.into() }
+        Self { key: key.into(), label: label.into(), run: None }
+    }
+
+    pub fn with_action(mut self, run: impl Fn() + Send + Sync + 'static) -> Self {
+        self.run = Some(std::sync::Arc::new(run));
+        self
     }
 }
 

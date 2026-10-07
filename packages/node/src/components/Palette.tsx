@@ -24,11 +24,11 @@ export function Palette({title, items, onPick, onClose}: Props) {
 
   useKeys([
     {keys: ['esc'], run: onClose},
-    {keys: ['up'], run: () => setSelectedId(Selection.move(visible, current, -1))},
-    {keys: ['down'], run: () => setSelectedId(Selection.move(visible, current, 1))},
+    {keys: ['up'], run: () => setSelectedId(id => Selection.move(visible, Selection.ensure(visible, id), -1))},
+    {keys: ['down'], run: () => setSelectedId(id => Selection.move(visible, Selection.ensure(visible, id), 1))},
     {keys: ['enter'], run: () => { const item = visible.find(candidate => candidate.id === current); if (item) onPick(item); }},
-    {keys: ['backspace', 'delete'], run: () => setQuery(query.slice(0, -1))},
-  ], {onText: text => setQuery(query + text)});
+    {keys: ['backspace', 'delete'], run: () => setQuery(q => q.slice(0, -1))},
+  ], {onText: text => setQuery(q => q + text)});
 
   return (
     <Overlay title={title}>

@@ -26,10 +26,17 @@ export function Input({value, onChange, onSubmit, placeholder = '', focused = tr
   useTyping(focused);
   const box = useRef<DOMElement>(null);
   useMouseTarget(box, {onPress: () => onFocus?.()});
+  // Keys faster than renders chain on `pending`, not on the value captured at the last render.
+  const pending = useRef(value);
+  pending.current = value;
+  const emit = (next: string) => {
+    pending.current = next;
+    onChange?.(next);
+  };
   useKeys([
-    {keys: ['enter'], run: () => onSubmit?.(value)},
-    {keys: ['backspace', 'delete'], run: () => onChange?.(value.slice(0, -1))},
-  ], {isActive: focused, onText: text => onChange?.(value + text)});
+    {keys: ['enter'], run: () => onSubmit?.(pending.current)},
+    {keys: ['backspace', 'delete'], run: () => emit(pending.current.slice(0, -1))},
+  ], {isActive: focused, onText: text => emit(pending.current + text)});
   const cursor = focused ? '█' : '';
   const bar = focused ? '┃' : ' ';
   return (

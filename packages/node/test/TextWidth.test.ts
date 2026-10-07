@@ -12,3 +12,12 @@ describe('TextWidth', () => {
     expect(TextWidth.widest(['abc', '기록'])).toBe(4);
   });
 });
+
+describe('TextWidth.truncate', () => {
+  it('cuts to the width with an ellipsis, by display width', () => {
+    expect(TextWidth.truncate('abcdef', 10)).toBe('abcdef');
+    expect(TextWidth.truncate('abcdef', 4)).toBe('abc…');
+    expect(TextWidth.truncate('한글입니다', 5)).toBe('한글…');
+    expect(TextWidth.truncate('abc', 0)).toBe('');
+  });
+});

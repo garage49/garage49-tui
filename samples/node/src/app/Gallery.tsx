@@ -64,6 +64,7 @@ export function Gallery() {
       commands={commands}
       help={galleryHelp}
       status={[{id: 'view', text: view.label, tone: 'muted'}, {id: 'page', text: page.label, tone: 'muted'}]}
+      hints={[{key: 'g', label: 'home', run: () => { setViewId('gallery'); setPageId('home'); }}]}
       context="garage49 · ~/work/garage49-tui"
       quitMessage="Quit garage49?"
     >

@@ -32,14 +32,18 @@ pub fn Sidebar(props: &mut SidebarProps, mut hooks: Hooks) -> impl Into<AnyEleme
     let ids: Vec<String> = items.iter().map(|item| item.id.clone()).collect();
     let selected = props.selected_id.clone();
     let on_select = std::sync::Arc::new(std::sync::Mutex::new(props.on_select.take()));
+    // Keys faster than renders chain on `pending`, not on the selection captured at the last render.
+    let pending = std::sync::Arc::new(std::sync::Mutex::new(selected.clone()));
     let mover = |delta: i32| {
         let on_select = on_select.clone();
         let items = items.clone();
         let ids = ids.clone();
-        let selected = selected.clone();
+        let pending = pending.clone();
         move || {
-            if let Some(next) = Selection::move_by(&ids, selected.as_deref(), delta) {
+            let mut current = pending.lock().expect("pending");
+            if let Some(next) = Selection::move_by(&ids, current.as_deref(), delta) {
                 if let Some(item) = items.iter().find(|item| item.id == next) {
+                    *current = Some(next.clone());
                     (on_select.lock().expect("handler"))(item.clone());
                 }
             }

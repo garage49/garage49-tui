@@ -4,7 +4,7 @@ import {useMouseTarget} from '../input/Mouse.js';
 import {TextWidth} from '../theme/TextWidth.js';
 import {useTheme} from '../theme/ThemeContext.js';
 
-export type KeyHint = {readonly key: string; readonly label: string};
+export type KeyHint = {readonly key: string; readonly label: string; /** What a click on the pair runs; the App's built-in hints have none and are routed by key. */ readonly run?: () => void};
 
 type Props = {hints: readonly KeyHint[]; left?: string; onPress?: (hint: KeyHint) => void};
 

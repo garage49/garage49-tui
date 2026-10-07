@@ -6,7 +6,7 @@ import {useTyping} from '../shell/Typing.js';
 import {useTheme} from '../theme/ThemeContext.js';
 import {FieldBar} from './FieldBar.js';
 import {Scrollbar} from './Scrollbar.js';
-import type {TextBuffer} from './TextBuffer.js';
+import {TextBuffer} from './TextBuffer.js';
 
 type Props = {
   label: string;
@@ -43,18 +43,26 @@ export function TextArea({label, buffer, onChange, placeholder = '', focused = f
     onPress: () => onFocus?.(),
     onWheel: event => setScrollTop(Math.max(0, Math.min(maxTop, top + (event.kind === 'wheel-up' ? -3 : 3)))),
   });
+  // Keys faster than renders chain on `pending`, not on the buffer captured at the last render.
+  const pending = useRef(buffer);
+  pending.current = buffer;
+  const emit = (next: TextBuffer) => {
+    pending.current = next;
+    onChange?.(next);
+  };
+  const edit = (f: (b: TextBuffer) => TextBuffer) => () => emit(f(pending.current));
   useKeys([
-    {keys: ['up'], run: () => (buffer.row === 0 ? onLeave?.(-1) : onChange?.(buffer.move(-1, 0)))},
-    {keys: ['down'], run: () => (buffer.row === buffer.lines.length - 1 ? onLeave?.(1) : onChange?.(buffer.move(1, 0)))},
-    {keys: ['left'], run: () => onChange?.(buffer.move(0, -1))},
-    {keys: ['right'], run: () => onChange?.(buffer.move(0, 1))},
-    {keys: ['pageup'], run: () => onChange?.(buffer.move(-rows, 0))},
-    {keys: ['pagedown'], run: () => onChange?.(buffer.move(rows, 0))},
-    {keys: ['home'], run: () => onChange?.(buffer.home())},
-    {keys: ['end'], run: () => onChange?.(buffer.end())},
-    {keys: ['enter'], run: () => onChange?.(buffer.newline())},
-    {keys: ['backspace', 'delete'], run: () => onChange?.(buffer.backspace())},
-  ], {isActive: focused, onText: text => onChange?.(buffer.insert(text))});
+    {keys: ['up'], run: () => (pending.current.row === 0 ? onLeave?.(-1) : emit(pending.current.move(-1, 0)))},
+    {keys: ['down'], run: () => (pending.current.row === pending.current.lines.length - 1 ? onLeave?.(1) : emit(pending.current.move(1, 0)))},
+    {keys: ['left'], run: edit(b => b.move(0, -1))},
+    {keys: ['right'], run: edit(b => b.move(0, 1))},
+    {keys: ['pageup'], run: edit(b => b.move(-rows, 0))},
+    {keys: ['pagedown'], run: edit(b => b.move(rows, 0))},
+    {keys: ['home'], run: edit(b => b.home())},
+    {keys: ['end'], run: edit(b => b.end())},
+    {keys: ['enter'], run: edit(b => b.newline())},
+    {keys: ['backspace', 'delete'], run: edit(b => b.backspace())},
+  ], {isActive: focused, onText: text => emit(pending.current.insert(text))});
 
   const empty = buffer.text === '' && !focused;
   return (

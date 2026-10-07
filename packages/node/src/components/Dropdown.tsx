@@ -25,8 +25,8 @@ export function Dropdown({items, initialId, onPick, onClose, onNavigate}: Props)
     {keys: ['esc'], run: onClose},
     {keys: ['left'], run: () => onNavigate?.(-1)},
     {keys: ['right'], run: () => onNavigate?.(1)},
-    {keys: ['up'], run: () => setCursorId(Selection.move(items, cursor, -1))},
-    {keys: ['down'], run: () => setCursorId(Selection.move(items, cursor, 1))},
+    {keys: ['up'], run: () => setCursorId(id => Selection.move(items, Selection.ensure(items, id), -1))},
+    {keys: ['down'], run: () => setCursorId(id => Selection.move(items, Selection.ensure(items, id), 1))},
     {keys: ['enter'], run: () => { const item = items.find(candidate => candidate.id === cursor); if (item) onPick(item); }},
   ]);
   const widest = TextWidth.widest(items.map(item => item.label + (item.shortcut ? `  ${item.shortcut}` : '')));

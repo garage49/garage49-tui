@@ -62,28 +62,44 @@ pub fn TextArea(props: &mut TextAreaProps, mut hooks: Hooks) -> impl Into<AnyEle
     }
     let on_change = Arc::new(Mutex::new(props.on_change.take()));
     let on_leave = Arc::new(Mutex::new(props.on_leave.take()));
+    // Keys faster than renders chain on `pending`, not on the buffer captured at the last render.
+    let pending = Arc::new(Mutex::new(buffer.clone()));
     let change = |f: Box<dyn Fn(&TextBuffer) -> TextBuffer + Send + Sync>| {
         let on_change = on_change.clone();
-        let buffer = buffer.clone();
-        move || (on_change.lock().expect("handler"))(f(&buffer))
+        let pending = pending.clone();
+        move || {
+            let mut current = pending.lock().expect("pending");
+            *current = f(&current);
+            (on_change.lock().expect("handler"))(current.clone())
+        }
     };
     let up = {
         let on_leave = on_leave.clone();
         let on_change = on_change.clone();
-        let buffer = buffer.clone();
-        move || if buffer.row == 0 { (on_leave.lock().expect("handler"))(-1) } else { (on_change.lock().expect("handler"))(buffer.move_by(-1, 0)) }
+        let pending = pending.clone();
+        move || {
+            let mut current = pending.lock().expect("pending");
+            if current.row == 0 { (on_leave.lock().expect("handler"))(-1) } else { *current = current.move_by(-1, 0); (on_change.lock().expect("handler"))(current.clone()) }
+        }
     };
     let down = {
         let on_leave = on_leave.clone();
         let on_change = on_change.clone();
-        let buffer = buffer.clone();
-        move || if buffer.row + 1 == buffer.lines.len() { (on_leave.lock().expect("handler"))(1) } else { (on_change.lock().expect("handler"))(buffer.move_by(1, 0)) }
+        let pending = pending.clone();
+        move || {
+            let mut current = pending.lock().expect("pending");
+            if current.row + 1 == current.lines.len() { (on_leave.lock().expect("handler"))(1) } else { *current = current.move_by(1, 0); (on_change.lock().expect("handler"))(current.clone()) }
+        }
     };
     let rows_i = rows as i32;
     let typed = {
         let on_change = on_change.clone();
-        let buffer = buffer.clone();
-        move |text: String| (on_change.lock().expect("handler"))(buffer.insert(&text))
+        let pending = pending.clone();
+        move |text: String| {
+            let mut current = pending.lock().expect("pending");
+            *current = current.insert(&text);
+            (on_change.lock().expect("handler"))(current.clone())
+        }
     };
     hooks.use_keys(
         props.focused,

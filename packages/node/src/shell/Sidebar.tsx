@@ -23,9 +23,15 @@ export function Sidebar({items, selectedId, onSelect, width = 26}: Props) {
   const overlayOpen = useOverlayState();
   const active = focused && !overlayOpen;
   useMouseTarget(box, {onPress: focus});
+  // Keys faster than renders chain on `pending`, not on the selection captured at the last render.
+  const pending = useRef(selectedId);
+  pending.current = selectedId;
   const move = (delta: number) => {
-    const next = items.find(item => item.id === Selection.move(items, selectedId, delta));
-    if (next) onSelect(next);
+    const next = items.find(item => item.id === Selection.move(items, pending.current, delta));
+    if (next) {
+      pending.current = next.id;
+      onSelect(next);
+    }
   };
   useKeys([
     {keys: ['up', 'k'], run: () => move(-1)},

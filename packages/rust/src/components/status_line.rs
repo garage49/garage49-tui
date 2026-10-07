@@ -1,6 +1,6 @@
 use iocraft::prelude::*;
 
-use crate::theme::Theme;
+use crate::theme::{TextWidth, Theme};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default)]
 pub enum StatusTone {
@@ -47,20 +47,31 @@ pub struct StatusLineProps {
 
 /// One row on the panel surface: state segments on the left, context on the right, separated by muted dots.
 #[component]
-pub fn StatusLine(props: &mut StatusLineProps, hooks: Hooks) -> impl Into<AnyElement<'static>> {
+pub fn StatusLine(props: &mut StatusLineProps, mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let theme = hooks.use_context::<Theme>().clone();
-    let render = |segments: &[StatusSegment]| -> Vec<MixedTextContent> {
+    let (columns, _) = hooks.use_terminal_size();
+    // The right side keeps its width; the left side is cut to what remains (padding 2+2, one gap).
+    let right_width: usize = props.right.iter().enumerate().map(|(i, s)| TextWidth::of(&s.text) + if i > 0 { 3 } else { 0 }).sum();
+    let left_width = (columns as usize).saturating_sub(4 + right_width + usize::from(!props.right.is_empty()));
+    let render = |segments: &[StatusSegment], budget: usize| -> Vec<MixedTextContent> {
         let mut contents = Vec::new();
+        let mut used = 0;
         for (index, segment) in segments.iter().enumerate() {
+            let separator = if index > 0 { 3 } else { 0 };
+            let text = TextWidth::truncate(&segment.text, budget.saturating_sub(used + separator));
+            if text.is_empty() {
+                break;
+            }
+            used += separator + TextWidth::of(&text);
             if index > 0 {
                 contents.push(MixedTextContent::new(" · ").color(theme.tokens.text_muted));
             }
-            contents.push(MixedTextContent::new(&segment.text).color(segment.tone.color(&theme)));
+            contents.push(MixedTextContent::new(&text).color(segment.tone.color(&theme)));
         }
         contents
     };
-    let left = render(&props.left);
-    let right = render(&props.right);
+    let left = render(&props.left, left_width);
+    let right = render(&props.right, right_width);
     element! {
         View(flex_direction: FlexDirection::Row, height: 1, width: 100pct, background_color: theme.tokens.panel, padding_left: 2, padding_right: 2) {
             View(flex_grow: 1.0_f32, flex_basis: FlexBasis::Length(0), overflow: Overflow::Hidden) { MixedText(contents: left, wrap: TextWrap::NoWrap) }

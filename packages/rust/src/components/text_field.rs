@@ -14,6 +14,8 @@ pub struct TextFieldProps {
     pub focused: bool,
     pub on_focus: HandlerMut<'static, ()>,
     pub label_width: Option<u16>,
+    /// Show * for every character (tokens, passwords).
+    pub secret: bool,
 }
 
 /// A one-line form field: label on the left, the value on a surface; the focused field gets the accent bar.
@@ -31,22 +33,28 @@ pub fn TextField(props: &mut TextFieldProps, mut hooks: Hooks) -> impl Into<AnyE
     });
     let on_change = std::sync::Arc::new(std::sync::Mutex::new(props.on_change.take()));
     let value = props.value.clone();
+    // Keys faster than renders chain on `pending`, not on the value captured at the last render.
+    let pending = std::sync::Arc::new(std::sync::Mutex::new(value.clone()));
     let backspace = {
         let on_change = on_change.clone();
-        let value = value.clone();
+        let pending = pending.clone();
         move || {
-            let mut next = value.clone();
+            let mut next = pending.lock().expect("pending");
             next.pop();
-            (on_change.lock().expect("handler"))(next);
+            (on_change.lock().expect("handler"))(next.clone());
         }
     };
     let typed = {
-        let value = value.clone();
-        move |text: String| (on_change.lock().expect("handler"))(format!("{value}{text}"))
+        let pending = pending.clone();
+        move |text: String| {
+            let mut next = pending.lock().expect("pending");
+            next.push_str(&text);
+            (on_change.lock().expect("handler"))(next.clone());
+        }
     };
     hooks.use_keys(props.focused, vec![Binding::new(&["backspace", "delete"], backspace)], Some(Box::new(typed)));
     let focused = props.focused;
-    let shown = if value.is_empty() { props.placeholder.clone().unwrap_or_default() } else { value.clone() };
+    let shown = if value.is_empty() { props.placeholder.clone().unwrap_or_default() } else if props.secret { "*".repeat(value.chars().count()) } else { value.clone() };
     let content = format!("{shown}{}", if focused { Glyphs::CURSOR } else { "" });
     element! {
         View(flex_direction: FlexDirection::Row, height: 1) {

@@ -1,4 +1,4 @@
-use garage49_tui_iocraft::{App, Command, Content, HelpEntry, ListItem, Main, Nav, Sidebar, StatusSegment, StatusTone, Tab};
+use garage49_tui_iocraft::{App, Command, Content, HelpEntry, KeyHint, ListItem, Main, Nav, Sidebar, StatusSegment, StatusTone, Tab};
 use iocraft::prelude::*;
 
 use crate::pages::{DialogsPage, EditingPage, FormPage, HelpPage, HomePage, IndicatorsPage, LabelsPage, ListPage, LogPage, SettingsPage, TablePage, TabsPage, TreePage};
@@ -77,7 +77,7 @@ pub fn Gallery(mut hooks: Hooks) -> impl Into<AnyElement<'static>> {
     let mut view_state = view;
     let mut page_state = page;
     element! {
-        App(commands: commands, help: gallery_help(),
+        App(commands: commands, help: gallery_help(), hints: vec![KeyHint::new("g", "home").with_action(move || { let mut view = view; let mut page = page; view.set("gallery".into()); page.set("home".into()); })],
             status: vec![StatusSegment::new(&view_label, StatusTone::Muted), StatusSegment::new(&page_label, StatusTone::Muted)],
             context: "garage49 · ~/work/garage49-tui", quit_message: "Quit garage49?".to_string()) {
             Nav(brand: "garage49", items: views(), active_id: view_id.clone(), on_change: move |tab: Tab| view_state.set(tab.id), right: "v0.1.0".to_string())

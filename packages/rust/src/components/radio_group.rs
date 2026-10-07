@@ -49,8 +49,8 @@ pub fn RadioGroup(props: &mut RadioGroupProps, mut hooks: Hooks) -> impl Into<An
     }
     let current = cursor.get();
     let len = options.len();
-    let up = { let on_leave = on_leave.clone(); let mut cursor = cursor; move || if current == 0 { (on_leave.lock().expect("handler"))(-1) } else { cursor.set(current - 1) } };
-    let down = { let on_leave = on_leave.clone(); let mut cursor = cursor; move || if current + 1 >= len { (on_leave.lock().expect("handler"))(1) } else { cursor.set(current + 1) } };
+    let up = { let on_leave = on_leave.clone(); let mut cursor = cursor; move || { let now = cursor.get(); if now == 0 { (on_leave.lock().expect("handler"))(-1) } else { cursor.set(now - 1) } } };
+    let down = { let on_leave = on_leave.clone(); let mut cursor = cursor; move || { let now = cursor.get(); if now + 1 >= len { (on_leave.lock().expect("handler"))(1) } else { cursor.set(now + 1) } } };
     let pick = { let choose = choose.clone(); move || choose(current) };
     hooks.use_keys(props.focused, vec![Binding::new(&["up", "k"], up), Binding::new(&["down", "j"], down), Binding::new(&["space", "enter"], pick)], None);
     let focused = props.focused;
