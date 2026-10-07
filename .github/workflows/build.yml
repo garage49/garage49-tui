@@ -1,0 +1,24 @@
+# Build and release on the garage49 build farm (rules: https://github.com/garage49/.github/blob/main/RULES.md).
+# Maintained by the build farm owner (sdfj_kr); ask over hc for changes.
+# Release: bump package.json, packages/node/package.json and both Cargo.toml versions in a commit on
+# main, then push tag vX.Y.Z on that commit.
+name: build
+on:
+  push: { branches: [main], tags: ['v*'] }
+  pull_request: {}
+  workflow_dispatch: {}
+permissions: { contents: write, id-token: write }
+jobs:
+  npm:
+    uses: garage49/.github/.github/workflows/node-build.yml@main
+    with:
+      packages: '["packages/node"]'
+      checks: 'pnpm check && pnpm dlx @garage49/aterm corpus check'
+  rust:
+    uses: garage49/.github/.github/workflows/rust-build.yml@main
+    with:
+      name: garage49-tui-iocraft
+      package: garage49-tui-iocraft
+      targets: '[]'
+      clippy: true
+      version-files: package.json samples/rust/Cargo.toml
