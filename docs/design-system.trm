@@ -1,0 +1,499 @@
+@knowledge tui_design_system
+@viewpoints specification
+@description {
+  The garage49 TUI design system: the themes, color roles, glyphs, surfaces, focus and key rules,
+  mouse behaviour, overlays, application frame and the components that every library implements.
+}
+@scope {
+  Define what the design system looks like and how it behaves, independent of any one library, so that
+  the Ink and iocraft libraries render the same screen for the same tree. Exclude application logic,
+  the libraries' internal structure and the terminal emulators themselves.
+}
+
+concept _Theme_ = {
+  A named set of semantic color tokens that every component refers to instead of raw colors.
+.relations
+  changed by _Dim_Theme_
+  governed by _Color_Role_
+.contract
+  - A Theme must provide the tokens text, textMuted, textBright, accent, accentSecondary, heading, success, warning, error, background, panel, surface, surfaceRaised, selectionBackground and selectionText.
+  - A component must refer to colors only through a Theme's tokens.
+  - The opencode Theme must use the values measured from OpenCode v2.0.21: text #eeeeee, textMuted #808080, textBright #ffffff, accent #fab283, accentSecondary #5c9cf5, heading #9d7cd8, background #0a0a0a, panel #141414, surface #1e1e1e, surfaceRaised #282828, selectionBackground #fab283, selectionText #0a0a0a.
+  - The system Theme must use the terminal's ANSI hues for accent, accentSecondary, heading, success, warning and error, and the 256-color gray ramp (232 to 255) for text and background tokens.
+  - A library must select the opencode Theme when the terminal reports truecolor and the system Theme otherwise, unless the application names a Theme.
+.remarks
+  Chosen: success #7fd88f, warning #f5a742 and error #e06c75 come from OpenCode's theme file, not from a measurement; they are provisional.
+  Chosen: 16 ANSI colors cannot tell four grays apart, so the system Theme takes its grays from the 256-color ramp; a 16-color terminal still runs with the nearest colors.
+}
+
+procedure _Dim_Theme_ = {
+  Produce the Theme shown under an open _Overlay_ by pulling every token of a _Theme_ towards black.
+.relations
+  changes _Theme_
+  triggered by _Overlay_
+.contract
+  - _Dim_Theme_ must scale every truecolor channel and every gray-ramp index by 0.4.
+  - _Dim_Theme_ must turn a named ANSI hue into gray and leave black as black.
+  - _Dim_Theme_ must apply to the whole screen below the _Overlay_, including the focus bar and any cursor.
+}
+
+concept _Color_Role_ = {
+  The fixed meaning of each color token, so that a color tells the reader what a thing is.
+.relations
+  governs _Theme_
+  marks _Cursor_
+  marks _Focus_Bar_
+.contract
+  - accent must mark the _Cursor_ and nothing else.
+  - accentSecondary must mark the _Focus_Bar_ and the bar of an editing field and nothing else.
+  - success, warning and error must mark state values only: a toggle that is on, a chosen radio option, a checked box, a status tone, an error title.
+  - heading must mark section headings in lists and the logo block only.
+}
+
+concept _Glyph_Set_ = {
+  The characters the design system draws states and edges with, kept in one place per library.
+.contract
+  - Every glyph must be East Asian Width N so it occupies one cell in every terminal; ambiguous-width glyphs such as ● ○ • ■ □ ◉ must not be used.
+  - A binary state must use the pair ▪ for on and ▫ for off, in toggles, radio options, filter chips, status dots and the idle spinner.
+  - A check box must use ☑ when checked and ☐ otherwise.
+  - A tree branch must use ▸ when collapsed and ▾ when expanded.
+  - The focus bar, the field bar and the scrollbar thumb must use ┃; the scrollbar track must use │.
+  - The active large tab must be marked by ▔ under its label; a surface's bottom edge must use ▀ and a focused input box's foot ╹.
+  - Display width must be measured with a width table (string-width or unicode-width), never taken from string length.
+}
+
+concept _Surface_ = {
+  A screen area told apart from its neighbours by background color alone.
+.relations
+  shown by _Region_
+.contract
+  - A _Surface_ must not be separated from its neighbours by line borders.
+  - A _Surface_ that ends above other content must end with a half-block edge ▀ in its own color.
+  - The sidebar, overlay panels and the status line must use the panel token; inputs, the header label row and dropdowns the surface token; unfocused selections, chips and buttons the surfaceRaised token.
+}
+
+concept _Region_ = {
+  A focusable screen area that can own the keyboard: the navigation header, the sidebar, the main page, or a field inside a form.
+.relations
+  blocked by _Overlay_
+  shows _Surface_
+  shows _Focus_Bar_
+  cycled by _Cycle_Focus_
+  has_member _Cursor_
+.contract
+  - A _Region_ must keep its first column free of content.
+  - A _Region_ must show the _Focus_Bar_ while it owns the keyboard and nothing in its first column otherwise.
+  - A _Region_ must react to keys only while it owns the keyboard and no _Overlay_ is open.
+  - A click inside a _Region_ must give it the keyboard.
+.remarks
+  Chosen: the focus bar is painted over the region's own first column instead of taking a column of its own, so the logo block can start at the screen edge and the bar reads as the region's inner edge.
+}
+
+concept _Focus_Bar_ = {
+  The blue ┃ column that shows which _Region_ owns the keyboard.
+.relations
+  hidden by _Overlay_
+  shown by _Region_
+  marked by _Color_Role_
+.contract
+  - Exactly one _Focus_Bar_ must be on screen while no _Overlay_ is open.
+  - A _Focus_Bar_ must cover the _Region_'s full height unless the _Region_ limits it to its title rows.
+  - A _Focus_Bar_ must be painted on the color the _Region_ draws in its first column.
+  - A _Focus_Bar_ must use accentSecondary.
+}
+
+procedure _Cycle_Focus_ = {
+  Move the keyboard from one _Region_ to another by key or by click.
+.relations
+  cycles _Region_
+.contract
+  - tab must move to the next _Region_ and shift+tab to the previous one, in screen order from top to bottom and then left to right, wrapping at the ends.
+  - enter must move down to the next _Region_ from the navigation header or the sidebar, and esc must move up to the previous one; neither must wrap.
+  - Arrow keys and hjkl must not move between Regions; they move inside the focused _Region_.
+  - A _Region_ that appears or disappears must enter or leave the cycle at its screen position.
+.remarks
+  Chosen: a sidebar that is not shown leaves the cycle, so a view without a sidebar cycles between the header and the page only.
+}
+
+concept _Cursor_ = {
+  The one selected item inside a focused _Region_: a list row, table row, tree row, radio option, chip, button or active tab.
+.relations
+  belongs to _Region_
+  marked by _Color_Role_
+.contract
+  - A focused _Region_ must show at most one _Cursor_, filled with selectionBackground and drawn in selectionText.
+  - A _Region_ that lost the keyboard must keep its _Cursor_ as a surfaceRaised fill.
+  - ↑ and ↓ or k and j must move the _Cursor_ one row and stop at the ends.
+  - Space or enter must choose or activate the item under the _Cursor_.
+  - The wheel must move the _Cursor_ one row per tick where the _Region_ is a list, table or tree.
+}
+
+concept _Key_Binding_ = {
+  A table entry that names the keys a component reacts to and the action they run.
+.relations
+  toggles _Theme_
+  toggles _Mouse_Reporting_
+  guarded by _Typing_State_
+.contract
+  - A component must declare its keys as a table of bindings, each with its key names and one action, never as a chain of conditions.
+  - A key must be named up, down, left, right, pageup, pagedown, home, end, enter, esc, tab, shift+tab, backspace, delete, space, ctrl+x, alt+x, or by its printable character.
+  - A printable key that no binding claims must go to the editing text field as text.
+  - The application keys must be ctrl+p for the command palette, ? for help, q for the quit confirmation, t to toggle the _Theme_ and m to toggle _Mouse_Reporting_.
+}
+
+concept _Typing_State_ = {
+  Whether a text field is being edited, so that single-letter application keys stay out of the way.
+.relations
+  guards _Key_Binding_
+.contract
+  - While a text field is editing, the keys q, ?, t and m must be inserted as text instead of running application actions.
+  - A text field must declare that it is editing while it owns the keyboard and withdraw the declaration when it loses it.
+}
+
+concept _Mouse_Reporting_ = {
+  The terminal's mouse events delivered to the application and routed to the component under the pointer.
+.relations
+  focuses _Region_
+  limited by _Overlay_
+  moves _Cursor_
+  toggled by _Key_Binding_
+.contract
+  - _Mouse_Reporting_ must be on when an application starts and must be turned off when it exits.
+  - m must toggle _Mouse_Reporting_, so the terminal's drag-to-select works again while it is off; the status line must show no mouse while it is off.
+  - A click must reach every component under the pointer from the innermost to the outermost, so a row click selects the row and gives its _Region_ the keyboard.
+  - While an _Overlay_ is open, only components inside the _Overlay_ must react to the mouse.
+  - The wheel must move the _Cursor_ in lists, tables and trees and scroll log views and text areas.
+}
+
+concept _Overlay_ = {
+  One element shown on top of the whole screen through the Screen's single slot: a dialog, the help, the command palette or a dropdown.
+.relations
+  dims _Theme_
+  triggers _Dim_Theme_
+  has_member _Confirm_Dialog_
+  has_member _Message_Dialog_
+  has_member _Help_Overlay_
+  has_member _Command_Palette_
+  has_member _Dropdown_
+.contract
+  - At most one _Overlay_ must be open; showing another must replace it.
+  - The screen below an open _Overlay_ must be drawn with the dimmed _Theme_.
+  - A click outside the _Overlay_ must hide it; esc must hide it.
+  - A _Dropdown_ must be anchored under its field; every other _Overlay_ must be centered.
+  - An _Overlay_ panel must use the panel token, a bold title at the left and esc muted at the right, and no border.
+}
+
+concept _App_Frame_ = {
+  The application tree every app is composed as: the frame, a navigation header, then content with an optional sidebar and the main page.
+.relations
+  provides _Theme_
+  provides _Mouse_Reporting_
+  provides _Cycle_Focus_
+  has_part _Navigation_Header_
+  has_part _Sidebar_
+  has_part _Main_Page_
+  has_part _Status_Line_
+  has_part _Key_Hint_Bar_
+  has_part _Overlay_
+.contract
+  - An _App_Frame_ must provide the screen, the _Theme_, _Mouse_Reporting_, the _Overlay_ slot, _Cycle_Focus_, the _Status_Line_ and the _Key_Hint_Bar_; an application adds only its regions and pages.
+  - An _App_Frame_ must render the three agreed layouts from the tree alone: a header only, a sidebar only, or both.
+  - An _App_Frame_ must show the quit confirmation on q, the help on ?, and the command palette on ctrl+p, and must add Toggle theme, Toggle mouse, Keyboard shortcuts and Quit to the palette.
+  - An _App_Frame_ must show a notice instead of the layout while the terminal is smaller than 80 by 24 cells.
+}
+
+concept _Navigation_Header_ = {
+  The two-row header at the top of an _App_Frame_: a logo block, one large tab per view and context text at the right.
+.relations
+  shows _Focus_Bar_
+  is_a _Region_
+  has_part _Tabs_
+.contract
+  - The first row must use the surface token and hold the logo block, the tab labels and the right text; the second row must use the background token and hold the ▔ line under the active tab.
+  - The logo block must draw the brand in bold on the heading token and start at the screen edge; its left padding is the _Focus_Bar_'s column, and the bar must cover only the first row.
+  - ← and → or h and l must switch the active view while the header owns the keyboard; a click on a tab must switch to it.
+}
+
+concept _Sidebar_ = {
+  The left panel of an _App_Frame_: a sectioned _List_ of pages, 26 cells wide.
+.relations
+  has_member _Cursor_
+  hands keyboard to _Main_Page_
+  is_a _Region_
+  has_part _List_
+.contract
+  - The _Sidebar_ must use the panel token and keep its _Cursor_ on the current page.
+  - ↑ and ↓ or k and j must select the previous or next page; enter must move the keyboard to the _Main_Page_.
+}
+
+concept _Main_Page_ = {
+  The page area of an _App_Frame_: a bright title, a blank row, then the page; it takes the remaining width.
+.relations
+  is_a _Region_
+.contract
+  - The _Main_Page_ must pad two cells on each side and one row above and below, and must clip content that does not fit.
+  - enter must not leave the _Main_Page_; it is the page's own key.
+}
+
+concept _Status_Line_ = {
+  The row above the key hint bar: the last reported action, the application's segments, and at the right the mouse state, theme name, terminal size and clock.
+.contract
+  - The _Status_Line_ must use the panel token and separate segments with a muted middle dot.
+  - The first segment must be ▪ followed by the last action a page reported, in the success token.
+}
+
+concept _Key_Hint_Bar_ = {
+  The bottom row: muted context at the left, key and label pairs at the right.
+.contract
+  - A pair must draw the key in the text token and the label in textMuted, two cells apart from the next pair.
+  - A click on a pair must run the key's action.
+  - The built-in pairs must be tab focus, ctrl+p commands, ? help and q quit, after the application's own.
+}
+
+concept _Field_ = {
+  A one-row or multi-row form input with a label at the left, a field bar and a value on a surface.
+.relations
+  is_a _Region_
+  has_member _Text_Field_
+  has_member _Text_Area_
+  has_member _Select_
+  has_member _Toggle_
+  has_member _Checkbox_
+  has_member _Radio_Group_
+.contract
+  - A _Field_ must draw its label in the text token while editing and textMuted otherwise, with a label width of 14 cells by default.
+  - A _Field_ must show a ┃ in accentSecondary on its surface's first column for every row while editing and a blank cell otherwise.
+  - A multi-row _Field_ must hand the keyboard to the previous field on ↑ at its first row and to the next field on ↓ at its last row.
+  - A click on a _Field_ must make it the editing field.
+}
+
+concept _Label_ = {
+  Text in one of the theme's roles: default, muted, bright, heading, accent, success, warning or error.
+.contract
+  - A heading or bright _Label_ must be bold; other roles must be regular weight.
+}
+
+concept _List_ = {
+  Rows grouped under section headings, with an optional shortcut or value at the right of each row.
+.relations
+  has_member _Cursor_
+.contract
+  - A section heading must be bold in the heading token and be preceded by a blank row except for the first section.
+  - A shortcut must be right-aligned in textMuted; a value must be right-aligned in the text token; a row cannot show both.
+  - A label that does not fit must be truncated with an ellipsis, never wrapped.
+}
+
+concept _Table_ = {
+  Rows of fixed-width columns under a muted bold header row.
+.relations
+  has_member _Cursor_
+.contract
+  - A column must have a fixed width and may be right-aligned; columns must be two cells apart.
+  - A cell that does not fit must be truncated, never wrapped.
+}
+
+concept _Tree_View_ = {
+  Hierarchical rows indented two cells per depth with a ▸ or ▾ marker on branches.
+.relations
+  has_member _Cursor_
+.contract
+  - → or l must expand a collapsed branch and otherwise step to the next row; ← or h must collapse an expanded branch and otherwise move to the parent.
+  - enter or space must toggle the branch under the _Cursor_; a click must select the row and toggle it.
+}
+
+concept _Log_View_ = {
+  A scrolling list of timestamped, leveled messages with the newest at the bottom and a _Scrollbar_ at the right.
+.relations
+  has_part _Scrollbar_
+.contract
+  - A row must draw the time in textMuted in a 9-cell column, the level bold in a 6-cell column (DEBUG textMuted, INFO accentSecondary, WARN warning, ERROR error), then the message; an ERROR message must use the error token.
+  - An offset of zero must follow the newest entry; ↑ and ↓ or k and j must scroll one row, pageup and pagedown ten, G or end must return to zero; the wheel must scroll three rows per tick.
+}
+
+concept _Scrollbar_ = {
+  A one-column indicator at the right of a scrolling view: a faint track with a thumb whose size and position show how much is above and below.
+.contract
+  - The thumb's length must be the track length times the visible share, at least one cell; its position must be proportional to the offset.
+  - The _Scrollbar_ must not be drawn while everything fits.
+  - The track must use surfaceRaised and the thumb textMuted.
+}
+
+concept _Tabs_ = {
+  A row of view labels in two sizes: small inside a page, large in the _Navigation_Header_.
+.relations
+  used by _Navigation_Header_
+  has_member _Cursor_
+.contract
+  - A small _Tabs_ must be one row and fill the active label as the _Cursor_.
+  - A large _Tabs_ must be two rows: the labels, then a ▔ line under the active label; the line must use accent while the tabs own the keyboard and textMuted otherwise.
+  - A tab label must be padded two cells on each side; a click on a tab must select it.
+}
+
+concept _Text_Field_ = {
+  A one-row _Field_ holding a line of text with a █ cursor at the end while editing.
+.relations
+  is_a _Field_
+.contract
+  - Typing must append text; backspace must remove the last character; a placeholder in textMuted must show while the value is empty.
+}
+
+concept _Text_Area_ = {
+  A multi-row _Field_ holding lines of text with the cursor drawn as the inverted cell, and a _Scrollbar_.
+.relations
+  is_a _Field_
+  has_part _Scrollbar_
+.contract
+  - Arrow keys must move the cursor by character and by line; enter must split the line at the cursor; backspace must remove the character before the cursor or join the line with the previous one at column zero.
+  - pageup and pagedown must move the cursor by the visible row count; home and end must move it within the line.
+  - The wheel must scroll the view three rows without moving the cursor; moving the cursor must bring it back into view.
+  - Text must be handled by character, so a CJK character or an emoji is one cursor step.
+}
+
+concept _Input_Box_ = {
+  OpenCode's command input: a bar column, three rows of surface with the text on the middle row, an optional footer row and a half-block bottom edge.
+.relations
+  is_a _Field_
+.contract
+  - While editing, the bar column must show ┃ in accentSecondary on every row and the bottom edge must start with ╹; otherwise the bar column is blank and the edge is all ▀.
+  - enter must submit the value; typing and backspace edit it.
+}
+
+concept _Select_ = {
+  A one-row _Field_ showing the chosen option and ▾, which opens a _Dropdown_ of options.
+.relations
+  is_a _Field_
+  opens _Dropdown_
+.contract
+  - enter, space or a click must open the _Dropdown_ anchored under the value; ← and → must cycle the option without opening it.
+}
+
+concept _Toggle_ = {
+  A one-row _Field_ for a boolean, drawn as ▪ on in the success token or ▫ off in textMuted on a surface.
+.relations
+  is_a _Field_
+.contract
+  - space, enter or a click must flip the value.
+}
+
+concept _Checkbox_ = {
+  A one-row _Field_ on the background drawn as ☑ in the success token or ☐ in textMuted before its label.
+.relations
+  is_a _Field_
+.contract
+  - space, enter or a click must flip the value.
+}
+
+concept _Radio_Group_ = {
+  A multi-row _Field_ with one option per row: ▪ in the success token for the chosen option, ▫ in textMuted for the others, and a _Cursor_ row.
+.relations
+  is_a _Field_
+  has_member _Cursor_
+.contract
+  - ↑ and ↓ or k and j must move the _Cursor_ without choosing; space or enter must choose the option under the _Cursor_; a click must choose directly.
+  - The _Cursor_ must start on the chosen option when the field takes the keyboard.
+}
+
+concept _Button_ = {
+  A label on a raised surface, padded two cells, that runs an action.
+.relations
+  has_member _Cursor_
+.contract
+  - The chosen _Button_ of a dialog must be the _Cursor_; the others must use surfaceRaised.
+  - A click must run the action.
+}
+
+concept _Chip_ = {
+  A small pill on a raised surface: a tag, a filter or a status.
+.relations
+  has_member _Cursor_
+.contract
+  - A tag _Chip_ must show × at its right and remove itself when × is clicked or when x or backspace is pressed under the _Cursor_.
+  - A filter _Chip_ must show ▪ when on and ▫ when off and flip on click.
+  - A status _Chip_ must color its label with the status tone; the pill itself stays on surfaceRaised so tone reads as a value, not a _Cursor_.
+}
+
+concept _Spinner_ = {
+  An in-progress marker in accentSecondary with an optional muted label.
+.contract
+  - A _Spinner_ must advance one frame every 160 milliseconds in one of the frame sets dots, line or bounce.
+  - An inactive _Spinner_ must show ▪ instead of animating.
+}
+
+concept _Confirm_Dialog_ = {
+  A centered _Overlay_ with a title, a message and two buttons, cancel and confirm.
+.relations
+  has_member _Cursor_
+  is_a _Overlay_
+  has_part _Button_
+.contract
+  - The confirm _Button_ must be the _Cursor_ only after ← → or tab moves there; cancel is chosen first.
+  - enter must run the chosen button; y must confirm, n and esc must cancel.
+  - A destructive _Confirm_Dialog_ must draw its title in the error token.
+}
+
+concept _Message_Dialog_ = {
+  A centered _Overlay_ with a title, a message and one OK button.
+.relations
+  is_a _Overlay_
+  has_part _Button_
+.contract
+  - enter, esc or a click on OK must close it; an error _Message_Dialog_ must draw its title in the error token.
+}
+
+concept _Help_Overlay_ = {
+  A centered _Overlay_ listing key bindings, one row per entry with the keys in the text token and the action in textMuted.
+.relations
+  lists _App_Frame_
+  is_a _Overlay_
+.contract
+  - The _Help_Overlay_ must list the _App_Frame_'s keys first and the application's entries after them.
+  - esc, ? or q must close it.
+}
+
+concept _Command_Palette_ = {
+  A centered _Overlay_ with a search line and a sectioned _List_ of commands filtered by the query.
+.relations
+  has_member _Cursor_
+  is_a _Overlay_
+  has_part _List_
+.contract
+  - Typing must filter the commands by label, case-insensitively; backspace must shorten the query.
+  - ↑ and ↓ must move the _Cursor_; enter or a click must run the command and close the palette.
+}
+
+concept _Dropdown_ = {
+  An _Overlay_ anchored under a _Select_: a _List_ of options on a surface, without blank rows above or below.
+.relations
+  has_member _Cursor_
+  is_a _Overlay_
+  has_part _List_
+  opened by _Select_
+.contract
+  - The _Cursor_ must start on the chosen option; ↑ and ↓ move it; enter or a click picks and closes.
+}
+
+concept _Library_ = {
+  An implementation of the design system for one UI library: @garage49/garage49-tui-ink for Ink on Node.js and garage49-tui-iocraft for iocraft on Rust.
+.relations
+  restores _Mouse_Reporting_
+  implements _App_Frame_
+  shown by _Gallery_
+.contract
+  - A _Library_ must render the same screen as every other _Library_ for the same tree, checked in a 110 by 32 cell terminal.
+  - A _Library_ must restore the terminal on exit, on panic and on ctrl+c: raw mode, the alternate screen, the cursor and _Mouse_Reporting_.
+  - A _Library_ must handle resize and must draw CJK and emoji at their display width without broken wrapping or truncation.
+  - A _Library_ must work under SSH, tmux and Herdr.
+.remarks
+  Chosen: the Ink and iocraft libraries were chosen over OpenTUI and ratatui because both are component models with hooks and flexbox layout, so one design system maps onto both.
+  Chosen: in iocraft a component that listens to the mouse has a View as its root element, because local mouse events do not reach a component whose root is another component.
+}
+
+concept _Gallery_ = {
+  A sample application per _Library_ that shows every element of the design system, one page each, built on the _App_Frame_.
+.relations
+  built on _App_Frame_
+  shows _Library_
+.contract
+  - A _Gallery_ must show every component of this Knowledge and the four views Gallery, Dashboard, Settings and Help.
+  - The galleries of all libraries must render the same screen for the same page, compared before a change to the design system is accepted.
+}

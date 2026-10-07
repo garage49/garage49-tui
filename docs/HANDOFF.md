@@ -1,3 +1,5 @@
+> History. This brief is kept as the record of the handoff on 2026-10-06. Decisions taken since then live in `AGENTS.md` (rules) and `docs/DESIGN.md` / `docs/design-system.trm` (the specification); where they disagree with this file, they win.
+
 # Handoff: garage49-tui
 
 Written by the `skills` agent (shared-skill development) on 2026-10-06 for the agent that owns
